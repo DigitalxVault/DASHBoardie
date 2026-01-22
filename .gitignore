@@ -31,3 +31,8 @@ Thumbs.db
 
 # GSD - Codebase intelligence (auto-generated, changes frequently)
 .planning/intel/
+
+# Claude & MCP (local config)
+.claude/
+.playwright-mcp/
+.planning/

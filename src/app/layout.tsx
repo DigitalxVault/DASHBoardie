@@ -5,7 +5,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'LoFi Immersive Interface',
-  description: 'Board game night control panel',
+  description: 'Board Game Interactive Dashboard',
 };
 
 export const viewport: Viewport = {
