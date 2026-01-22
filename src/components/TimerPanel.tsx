@@ -174,7 +174,7 @@ function CountdownTimer() {
   const isLowTime = countdownTime <= 5 && countdownTime > 0;
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-w-0">
       {/* Section Header */}
       <div className="flex items-center gap-1.5 mb-2">
         <span className="text-[10px] text-text-muted font-medium tracking-wide">
@@ -234,8 +234,8 @@ function CountdownTimer() {
         </div>
       </div>
 
-      {/* Compact 2x2 Preset Grid */}
-      <div className="grid grid-cols-4 gap-1.5 mb-2">
+      {/* Compact Preset Grid - 2x2 on very small, 4 on larger */}
+      <div className="grid grid-cols-4 gap-1 sm:gap-1.5 mb-2">
         {PRESETS.map((preset) => (
           <button
             key={preset.label}
@@ -254,16 +254,16 @@ function CountdownTimer() {
         ))}
       </div>
 
-      {/* Compact Custom Input */}
-      <div className="flex gap-1.5 mb-3">
+      {/* Compact Custom Input - constrained to prevent overflow */}
+      <div className="flex gap-1.5 mb-3 max-w-full">
         <input
           type="text"
           value={customInput}
           onChange={(e) => setCustomInput(e.target.value)}
           placeholder="MM:SS"
           className="
-            flex-1 px-2 py-1.5 rounded-lg
-            bg-[rgba(255,255,255,0.8)] border border-[rgba(255,255,255,0.9)]
+            w-16 min-w-0 px-2 py-1.5 rounded-lg
+            bg-[rgba(255,255,255,0.8)] border-2 border-[rgba(59,201,219,0.4)]
             text-text-primary text-center text-sm font-medium
             focus:outline-none focus:ring-[3px] focus:ring-[rgba(59,201,219,0.3)]
             placeholder:text-text-muted
@@ -273,7 +273,7 @@ function CountdownTimer() {
         <button
           onClick={handleCustomSet}
           className="
-            px-3 py-1.5 rounded-lg text-xs font-medium
+            px-2 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap
             bg-[rgba(255,255,255,0.5)] border-2 border-[rgba(59,201,219,0.4)]
             text-text-secondary hover:text-text-primary
             hover:border-[rgba(59,201,219,0.6)] hover:bg-[rgba(255,255,255,0.7)]
@@ -402,7 +402,7 @@ function Stopwatch() {
   const progress = secondsInMinute / 60;
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-w-0">
       {/* Section Header */}
       <div className="flex items-center gap-1.5 mb-2">
         <span className="text-[10px] text-text-muted font-medium tracking-wide">
@@ -498,15 +498,15 @@ export function TimerPanel() {
           </h2>
         </div>
 
-        {/* Dual Timer Layout */}
-        <div className="flex-1 grid grid-cols-2 gap-3">
+        {/* Dual Timer Layout - responsive with overflow protection */}
+        <div className="flex-1 grid grid-cols-2 gap-2 sm:gap-3 min-w-0 overflow-hidden">
           {/* Countdown Section */}
-          <div className="border-r border-[rgba(0,0,0,0.06)] pr-3">
+          <div className="border-r border-[rgba(0,0,0,0.06)] pr-2 sm:pr-3 min-w-0 overflow-hidden">
             <CountdownTimer />
           </div>
 
           {/* Stopwatch Section */}
-          <div className="pl-1">
+          <div className="pl-1 min-w-0 overflow-hidden">
             <Stopwatch />
           </div>
         </div>
