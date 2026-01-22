@@ -154,7 +154,7 @@ interface SoundButtonConfig {
 persist(
   (set, get) => ({ /* store */ }),
   {
-    name: 'rt-LoFi-config',
+    name: 'lofi-config',
     partialize: (state) => ({
       musicVolume: state.musicVolume,
       effectsVolume: state.effectsVolume,
@@ -414,7 +414,7 @@ App Load
     ▼
 Zustand persist middleware
     │
-    ├── Read localStorage('rt-LoFi-config')
+    ├── Read localStorage('lofi-config')
     │
     ▼
 Hydrate store with:

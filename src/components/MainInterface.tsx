@@ -27,7 +27,7 @@ export function MainInterface() {
               LoFi Interface
             </h1>
             <p className="text-sm text-text-muted font-medium">
-              Control Panel Active
+              Interactive Dashboard
             </p>
           </div>
         </div>

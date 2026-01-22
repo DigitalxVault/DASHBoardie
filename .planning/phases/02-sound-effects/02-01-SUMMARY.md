@@ -28,7 +28,7 @@
 - **SoundEffectButton interface**: id, name, soundFile
 - **Default buttons**: 10 buttons named "Effect 1" through "Effect 10"
 - **Actions**: updateSoundEffectButton, resetSoundEffectButtons
-- **Persisted to localStorage** as part of 'rt-LoFi-storage'
+- **Persisted to localStorage** as part of 'lofi-storage'
 
 ### SoundEffectsPanel Component
 - **Grid layout**: 2 columns (mobile) → 5 columns (tablet/desktop)

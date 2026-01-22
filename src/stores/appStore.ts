@@ -227,7 +227,7 @@ export const useAppStore = create<AppState>()(
         set({ diceRolls: [] }),
     }),
     {
-      name: 'rt-LoFi-storage',
+      name: 'lofi-storage',
       storage: createJSONStorage(() => {
         // Lazy access to localStorage only on client-side
         if (typeof window !== 'undefined') {

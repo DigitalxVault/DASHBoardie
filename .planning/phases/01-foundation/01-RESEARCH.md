@@ -46,7 +46,7 @@ The established libraries/tools for this phase:
 
 ```bash
 # Create Next.js project with all defaults
-npx create-next-app@latest rt-LoFi-interface --typescript --tailwind --eslint --app --src-dir --yes
+npx create-next-app@latest lofi-interface --typescript --tailwind --eslint --app --src-dir --yes
 
 # Core dependencies
 npm install use-sound zustand
@@ -613,7 +613,7 @@ export const useAppStore = create<AppState>()(
       setEffectsVolume: (volume) => set({ effectsVolume: volume }),
     }),
     {
-      name: 'rt-LoFi-storage',
+      name: 'lofi-storage',
       storage: createJSONStorage(() => localStorage),
       // Only persist user preferences, not runtime state
       partialize: (state) => ({
