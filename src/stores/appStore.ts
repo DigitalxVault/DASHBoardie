@@ -17,6 +17,9 @@ interface MusicPlaybackState {
   loop: boolean // whether to loop the track
 }
 
+// Theme state (persisted)
+export type Theme = 'light' | 'dark' | 'system'
+
 // Timer state (not persisted)
 export type TimerMode = 'countdown' | 'stopwatch'
 
@@ -38,6 +41,9 @@ export interface DiceRoll {
 }
 
 interface AppState {
+  // Theme preference (persisted)
+  theme: Theme
+
   // Volume preferences (persisted)
   musicVolume: number
   effectsVolume: number
@@ -55,6 +61,7 @@ interface AppState {
   diceRolls: DiceRoll[]
 
   // Actions
+  setTheme: (theme: Theme) => void
   setMusicVolume: (volume: number) => void
   setEffectsVolume: (volume: number) => void
   updateSoundEffectButton: (id: string, updates: Partial<SoundEffectButton>) => void
@@ -113,6 +120,9 @@ const defaultTimer: TimerState = {
 export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
+      // Default theme
+      theme: 'light' as Theme,
+
       // Default volume values
       musicVolume: 0.5,
       effectsVolume: 0.7,
@@ -128,6 +138,9 @@ export const useAppStore = create<AppState>()(
 
       // Default dice rolls (empty array)
       diceRolls: [],
+
+      // Theme action
+      setTheme: (theme) => set({ theme }),
 
       // Volume actions
       setMusicVolume: (volume) => set({ musicVolume: volume }),
@@ -243,9 +256,10 @@ export const useAppStore = create<AppState>()(
           key: () => null,
         } as Storage;
       }),
-      // Persist volume settings, button configurations, and dice history
+      // Persist theme, volume settings, button configurations, and dice history
       // Music playback and timer state are runtime-only (resets on page load)
       partialize: (state) => ({
+        theme: state.theme,
         musicVolume: state.musicVolume,
         effectsVolume: state.effectsVolume,
         soundEffectButtons: state.soundEffectButtons,

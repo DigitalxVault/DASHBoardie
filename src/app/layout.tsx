@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { montserrat } from '@/lib/fonts';
 import { AudioProvider } from '@/providers/AudioProvider';
+import { ThemeProvider } from '@/providers/ThemeProvider';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -86,9 +87,11 @@ export default function RootLayout({
         <link rel="apple-touch-startup-image" href="/icons/apple-splash-1136-640.jpg" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)" />
       </head>
       <body className="min-h-screen text-text-primary antialiased">
-        <AudioProvider>
-          {children}
-        </AudioProvider>
+        <ThemeProvider>
+          <AudioProvider>
+            {children}
+          </AudioProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

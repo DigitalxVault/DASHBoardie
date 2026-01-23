@@ -2,9 +2,9 @@
 
 import { GlassButton } from '@/components/ui/GlassButton';
 import { GlassPanel } from '@/components/ui/GlassPanel';
+import { Logo } from '@/components/ui/Logo';
 import { useAudio } from '@/providers/AudioProvider';
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 
 interface WelcomeScreenProps {
   onEnter: () => void;
@@ -82,14 +82,7 @@ export function WelcomeScreen({ onEnter }: WelcomeScreenProps) {
           <div className="text-center space-y-6">
             {/* Company Logo */}
             <div className="flex justify-center mb-4">
-              <Image
-                src="/images/BLACK FONTS.png"
-                alt="Mages Studio"
-                width={200}
-                height={60}
-                className="h-12 w-auto object-contain"
-                priority
-              />
+              <Logo width={200} height={60} className="h-12 w-auto object-contain" />
             </div>
 
             {/* App Title */}
