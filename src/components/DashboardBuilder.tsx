@@ -1,9 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, lazy, Suspense } from 'react'
 import Image from 'next/image'
 import { useCanvasStore } from '@/stores/canvasStore'
-import { DashboardCanvas } from '@/components/canvas'
+
+// Lazy load heavy canvas components
+const DashboardCanvas = lazy(() => import('@/components/canvas').then(m => ({ default: m.DashboardCanvas })))
+
+// Light components loaded normally
 import { FeatureNav } from '@/components/nav'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { ContextMenu, useContextMenu } from '@/components/ui/ContextMenu'
@@ -94,7 +98,13 @@ export function DashboardBuilder() {
 
         {/* Canvas */}
         <div className="flex-1 overflow-hidden">
-          <DashboardCanvas />
+          <Suspense fallback={
+            <div className="w-full h-full flex items-center justify-center">
+              <div className="w-10 h-10 border-4 border-[#3BC9DB] border-t-transparent rounded-full animate-spin" />
+            </div>
+          }>
+            <DashboardCanvas />
+          </Suspense>
         </div>
       </div>
 
