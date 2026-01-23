@@ -64,7 +64,7 @@ export function DashboardBuilder() {
               alt="Mages Studio"
               width={100}
               height={30}
-              className="h-6 w-auto object-contain dark:invert dark:brightness-200"
+              className="h-6 w-auto object-contain"
               priority
             />
             <div className="h-5 w-px bg-[rgba(0,0,0,0.1)] dark:bg-[rgba(255,255,255,0.1)]" />
