@@ -61,8 +61,8 @@ function MusicPlayer({
     const audio = new Audio(soundPath);
     audioRef.current = audio;
 
-    // Set initial volume
-    audio.volume = volume;
+    // Set initial volume (clamped for safety)
+    audio.volume = Math.max(0, Math.min(1, volume));
 
     // Get duration when metadata loads
     audio.addEventListener('loadedmetadata', () => {
@@ -105,6 +105,9 @@ function MusicPlayer({
     const audio = audioRef.current;
     if (!audio) return;
 
+    // Always ensure volume is set before playing
+    audio.volume = volume;
+
     if (isPlaying) {
       audio.play().catch(() => {
         // Auto-play blocked or other error
@@ -113,12 +116,14 @@ function MusicPlayer({
     } else {
       audio.pause();
     }
-  }, [isPlaying, onPlayingChange]);
+  }, [isPlaying, volume, onPlayingChange]);
 
-  // Handle volume changes
+  // Handle volume changes - ensure volume is clamped and applied
   useEffect(() => {
     if (audioRef.current) {
-      audioRef.current.volume = volume;
+      // Clamp volume between 0 and 1 for safety
+      const clampedVolume = Math.max(0, Math.min(1, volume));
+      audioRef.current.volume = clampedVolume;
     }
   }, [volume]);
 
