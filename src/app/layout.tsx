@@ -4,17 +4,17 @@ import { AudioProvider } from '@/providers/AudioProvider';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'LoFi Immersive Interface',
-  description: 'Board Game Interactive Dashboard',
+  title: 'Dash-Boardie',
+  description: 'Modular Dashboard Builder for Tabletop Gaming',
   openGraph: {
-    title: 'LoFi Immersive Interface',
-    description: 'Board Game Interactive Dashboard',
+    title: 'Dash-Boardie',
+    description: 'Modular Dashboard Builder for Tabletop Gaming',
     type: 'website',
   },
   twitter: {
     card: 'summary',
-    title: 'LoFi Immersive Interface',
-    description: 'Board Game Interactive Dashboard',
+    title: 'Dash-Boardie',
+    description: 'Modular Dashboard Builder for Tabletop Gaming',
   },
 };
 
@@ -28,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={montserrat.variable}>
+    <html lang="en" className={montserrat.variable} suppressHydrationWarning>
       <body className="min-h-screen text-text-primary antialiased">
         <AudioProvider>
           {children}

@@ -37,6 +37,9 @@ export interface DiceRoll {
   timestamp: number
 }
 
+// Theme type
+export type Theme = 'light' | 'dark'
+
 interface AppState {
   // Volume preferences (persisted)
   musicVolume: number
@@ -54,11 +57,18 @@ interface AppState {
   // Dice rolls (persisted - last 5 rolls)
   diceRolls: DiceRoll[]
 
+  // Theme preference (persisted)
+  theme: Theme
+
   // Actions
   setMusicVolume: (volume: number) => void
   setEffectsVolume: (volume: number) => void
   updateSoundEffectButton: (id: string, updates: Partial<SoundEffectButton>) => void
   resetSoundEffectButtons: () => void
+
+  // Theme actions
+  setTheme: (theme: Theme) => void
+  toggleTheme: () => void
 
   // Music playback actions (loop is persisted)
   setMusicPlaying: (playing: boolean) => void
@@ -128,6 +138,9 @@ export const useAppStore = create<AppState>()(
 
       // Default dice rolls (empty array)
       diceRolls: [],
+
+      // Default theme
+      theme: 'light' as Theme,
 
       // Volume actions
       setMusicVolume: (volume) => set({ musicVolume: volume }),
@@ -225,9 +238,16 @@ export const useAppStore = create<AppState>()(
 
       clearDiceHistory: () =>
         set({ diceRolls: [] }),
+
+      // Theme actions
+      setTheme: (theme) => set({ theme }),
+      toggleTheme: () =>
+        set((state) => ({
+          theme: state.theme === 'light' ? 'dark' : 'light',
+        })),
     }),
     {
-      name: 'lofi-storage',
+      name: 'dashboardie-storage',
       storage: createJSONStorage(() => {
         // Lazy access to localStorage only on client-side
         if (typeof window !== 'undefined') {
@@ -250,6 +270,7 @@ export const useAppStore = create<AppState>()(
         effectsVolume: state.effectsVolume,
         soundEffectButtons: state.soundEffectButtons,
         diceRolls: state.diceRolls,
+        theme: state.theme,
       }),
       skipHydration: true,
     }

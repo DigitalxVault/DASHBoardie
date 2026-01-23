@@ -1,62 +1,79 @@
-# LoFi Immersive Interface
+# Dash-Boardie
 
-> A beautiful, all-in-one audio and utility dashboard for tabletop gaming sessions.
+> A modular, drag-and-drop dashboard builder for tabletop gaming sessions.
 
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
 [![Next.js](https://img.shields.io/badge/Next.js-16.1-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)](https://www.typescriptlang.org/)
+[![React Flow](https://img.shields.io/badge/React%20Flow-12-purple)](https://reactflow.dev/)
 
 ---
 
 ## Overview
 
-The LoFi Immersive Interface is a web-based control panel designed for board game and tabletop RPG enthusiasts. It combines sound effects, background music, timers, and dice rolling into a single, gorgeous glassmorphic interface.
+**Dash-Boardie** is a customizable control panel builder for board games and tabletop RPGs. Drag feature blocks onto an infinite canvas to create your perfect gaming interface with timers, dice rollers, sound effects, and background music.
 
-**Live Demo:** [Coming Soon]
+**Features:**
+- Infinite canvas with pan & zoom
+- Drag-and-drop feature blocks
+- Dark/Light theme toggle
+- Glassmorphic UI design
+- Auto-save to localStorage
 
-![LoFi Interface](https://img.shields.io/badge/Status-MVP%20Complete-success)
+![Status](https://img.shields.io/badge/Status-In%20Development-yellow)
 
 ---
 
-## Features
+## Feature Blocks
 
-- **Sound Effects Board** - 10 customizable buttons for instant audio feedback
-- **Background Music Player** - Seamless ambient music with loop control
-- **Dual Timer Panel** - Countdown timer + stopwatch with millisecond precision
-- **Dice Roller** - 2d6 with roll history and smooth animations
-- **Liquid Glass UI** - Beautiful frosted glass design with soft shadows
-- **Fully Responsive** - Works on mobile, tablet, and desktop
-- **Zero Setup** - No login, no installation required
+| Block | Description |
+|-------|-------------|
+| **Timer** | Countdown + Stopwatch with presets and alert sounds |
+| **Dice** | 2D6 roller with animated rolls and history |
+| **Sound Effects** | 10 customizable buttons for instant audio |
+| **Background Music** | Track player with loop and volume control |
+
+### Block Capabilities
+- Drag to reposition
+- Resize via corner handles
+- Rotate in 90° increments
+- Duplicate (Ctrl+D)
+- Multi-select (Shift+click)
+- Right-click context menu
 
 ---
 
 ## Quick Start
 
-### Play Online
+### Prerequisites
+- Node.js 18+
+- npm or yarn
 
-Visit the deployed site and tap "Begin" to enter the control panel.
-
-### Local Development
+### Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/DigitalxVault/MAGES_Interface.git
-cd MAGES_Interface
+git clone https://github.com/yourusername/dash-boardie.git
+cd dash-boardie
 
 # Install dependencies
 npm install
 
 # Run development server
 npm run dev
+```
 
-# Build for production
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Build for Production
+
+```bash
+# Build static export
 npm run build
 
 # Preview production build
 npm run preview
 ```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
@@ -64,18 +81,28 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ```
 src/
-├── app/                 # Next.js App Router
-├── components/          # React components
-│   ├── ui/             # Reusable UI components
-│   ├── WelcomeScreen.tsx
-│   ├── MainInterface.tsx
+├── app/                    # Next.js App Router
+│   ├── page.tsx           # Entry point
+│   ├── layout.tsx         # Root layout
+│   └── globals.css        # Styles & theme variables
+│
+├── components/
+│   ├── canvas/            # Canvas & controls
+│   ├── blocks/            # Feature block wrappers
+│   ├── nav/               # Navigation panel
+│   ├── ui/                # Reusable components
+│   ├── TimerPanel.tsx     # Timer feature
+│   ├── DicePanel.tsx      # Dice roller
 │   ├── SoundEffectsPanel.tsx
-│   ├── BackgroundMusic.tsx
-│   ├── TimerPanel.tsx
-│   └── DicePanel.tsx
-├── providers/          # React context providers
-├── stores/             # Zustand state management
-└── lib/                # Utility functions
+│   └── BackgroundMusic.tsx
+│
+├── stores/
+│   ├── appStore.ts        # App preferences
+│   └── canvasStore.ts     # Canvas layout
+│
+├── hooks/                 # Custom React hooks
+├── providers/             # Context providers
+└── types/                 # TypeScript definitions
 ```
 
 ---
@@ -84,70 +111,92 @@ src/
 
 | Technology | Purpose |
 |------------|---------|
-| **Next.js 16** | React framework with App Router |
+| **Next.js 16** | React framework (static export) |
 | **React 19** | UI library |
 | **TypeScript** | Type safety |
+| **React Flow** | Infinite canvas |
 | **Tailwind CSS 4** | Styling |
 | **Zustand** | State management |
 | **use-sound** | Audio playback |
 
 ---
 
-## Adding Custom Sounds
+## Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Delete` | Delete selected block(s) |
+| `Ctrl+D` / `Cmd+D` | Duplicate selected block(s) |
+| `Arrow Keys` | Nudge 1px |
+| `Shift+Arrow` | Nudge 20px (grid size) |
+| `Ctrl+A` / `Cmd+A` | Select all blocks |
+| `Escape` | Deselect all |
+
+---
+
+## Adding Audio
 
 ### Sound Effects
-
-Place MP3 files in `/public/sounds/effects/` and configure them via the "Configure" button in the Sound Effects panel.
+Place MP3 files in `/public/sounds/effects/` - configure via the Sound Effects panel.
 
 ### Background Music
+Place MP3 files in `/public/sounds/background/` - they appear in the track selector automatically.
 
-Place MP3 files in `/public/sounds/background/` - they'll automatically appear in the track selector.
+Audio files are auto-discovered at build time.
 
 ---
 
 ## Design System
 
-This project uses the **Liquid Glass UI** design system. See [docs/styleguide.md](./docs/styleguide.md) for complete specifications.
+**Liquid Glass UI** - Glassmorphic design with soft shadows and frosted panels.
 
-**Key Colors:**
-- Background: `#EEEEF5`
-- Accent Teal: `#38D9A9`
-- Accent Cyan: `#3BC9DB`
-- Text Primary: `#1A1A2E`
+| Token | Light Mode | Dark Mode |
+|-------|------------|-----------|
+| Background | `#EEEEF5` | `#1A1A2E` |
+| Glass | `rgba(255,255,255,0.65)` | `rgba(30,30,40,0.75)` |
+| Accent | `#38D9A9` → `#3BC9DB` | Same |
+| Text | `#1A1A2E` | `#F5F5FA` |
 
 **Typography:** Montserrat
 
+See [docs/styleguide.md](./docs/styleguide.md) for full specifications.
+
 ---
 
-## Roadmap
+## Deployment
 
-### MVP (v1.0) - Complete
-- [x] Sound effects panel
-- [x] Background music player
-- [x] Countdown timer + stopwatch
-- [x] Dice roller (2d6)
-- [x] Liquid Glass UI
-- [x] Responsive design
+### Vercel (Recommended)
 
-### Upcoming
+```bash
+npm run deploy
+```
 
-- [ ] Persistent settings (LocalStorage)
-- [ ] Additional dice types (d4, d8, d10, d12, d20)
-- [ ] Custom sound upload
-- [ ] Dark mode theme
-- [ ] PWA support
-- [ ] Multiple named timers
+Or connect your GitHub repository to Vercel for automatic deployments.
+
+### Static Hosting
+
+```bash
+npm run build
+# Deploy contents of /out to any static host
+```
+
+---
+
+## Browser Support
+
+- Chrome 90+
+- Firefox 88+
+- Safari 14+
+- Edge 90+
 
 ---
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
 ---
@@ -166,4 +215,4 @@ Built by [Mages Studio](https://github.com/DigitalxVault)
 
 ### Support
 
-For issues and feature requests, please [open an issue](https://github.com/DigitalxVault/MAGES_Interface/issues).
+For issues and feature requests, please [open an issue](https://github.com/yourusername/dash-boardie/issues).

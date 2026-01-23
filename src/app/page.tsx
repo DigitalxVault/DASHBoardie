@@ -8,8 +8,8 @@ const WelcomeScreen = dynamic(
   () => import('@/components/WelcomeScreen').then(m => ({ default: m.WelcomeScreen })),
   { ssr: false }
 );
-const MainInterface = dynamic(
-  () => import('@/components/MainInterface').then(m => ({ default: m.MainInterface })),
+const DashboardBuilder = dynamic(
+  () => import('@/components/DashboardBuilder').then(m => ({ default: m.DashboardBuilder })),
   { ssr: false }
 );
 
@@ -35,13 +35,13 @@ export default function Home() {
         <WelcomeScreen onEnter={handleEnter} />
       </div>
 
-      {/* Main Interface - fades in after entry */}
+      {/* Dashboard Builder - fades in after entry */}
       <div
         className={`transition-opacity duration-400 ease-out ${
           showMain ? 'opacity-100' : 'opacity-0'
         } ${!showMain ? 'hidden' : ''}`}
       >
-        <MainInterface />
+        <DashboardBuilder />
       </div>
     </>
   );

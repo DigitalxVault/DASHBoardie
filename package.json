@@ -1,7 +1,8 @@
 {
-  "name": "lofi-immersive-interface",
+  "name": "dash-boardie",
   "version": "1.0.0",
   "private": true,
+  "description": "A modular, drag-and-drop dashboard builder for tabletop gaming sessions",
   "scripts": {
     "predev": "node scripts/generate-audio-manifest.js",
     "dev": "next dev",
@@ -12,19 +13,18 @@
     "preview": "npx serve out",
     "deploy": "vercel --prod"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/DigitalxVault/MAGES_Interface.git"
-  },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "tabletop",
+    "gaming",
+    "dashboard",
+    "dice",
+    "timer",
+    "soundboard"
+  ],
+  "author": "Mages Studio",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/DigitalxVault/MAGES_Interface/issues"
-  },
-  "homepage": "https://github.com/DigitalxVault/MAGES_Interface#readme",
-  "description": "",
   "dependencies": {
+    "@xyflow/react": "^12.4.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.562.0",

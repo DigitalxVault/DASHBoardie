@@ -1,0 +1,5 @@
+export { DashboardCanvas } from './DashboardCanvas'
+export { CanvasBackground } from './CanvasBackground'
+export { CanvasControls } from './CanvasControls'
+export { CanvasMinimap } from './CanvasMinimap'
+export { BlockNode } from './BlockNode'

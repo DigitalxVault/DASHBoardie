@@ -54,10 +54,10 @@ export function WelcomeScreen({ onEnter }: WelcomeScreenProps) {
             {/* App Title */}
             <div className="space-y-2">
               <h1 className="text-4xl md:text-5xl font-semibold tracking-tight text-text-primary">
-                LoFi Interface
+                Dash-Boardie
               </h1>
               <p className="text-sm md:text-base text-text-muted font-medium">
-                Board Game Control Panel
+                Dashboard Builder for Tabletop Gaming
               </p>
             </div>
 
