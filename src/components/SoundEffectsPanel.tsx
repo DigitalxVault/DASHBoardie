@@ -5,7 +5,7 @@ import { GlassButton } from '@/components/ui/GlassButton';
 import { ConfigModal } from '@/components/ConfigModal';
 import { useAppStore, type SoundEffectButton } from '@/stores/appStore';
 import { useSound } from 'use-sound';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 interface SoundButtonProps {
   button: SoundEffectButton;
@@ -24,12 +24,19 @@ function SoundButton({ button, volume }: SoundButtonProps) {
     ? `/sounds/effects/${encodeURIComponent(button.soundFile)}`
     : SILENT_AUDIO;
 
-  const [play, { stop }] = useSound(soundPath, {
+  const [play, { stop, sound }] = useSound(soundPath, {
     volume: hasSound ? volume : 0,
     html5: true,
     onend: () => setIsPlaying(false),
     onplay: () => setIsPlaying(true),
   });
+
+  // Update volume when it changes (for already-initialized sounds)
+  useEffect(() => {
+    if (sound && hasSound) {
+      sound.volume(volume);
+    }
+  }, [volume, sound, hasSound]);
 
   // Toggle play/stop behavior
   const handleClick = useCallback(() => {
