@@ -37,10 +37,13 @@ export interface DiceRoll {
   timestamp: number
 }
 
-// Theme type
+// Theme type (persisted)
 export type Theme = 'light' | 'dark'
 
 interface AppState {
+  // Theme preference (persisted)
+  theme: Theme
+
   // Volume preferences (persisted)
   musicVolume: number
   effectsVolume: number
@@ -57,18 +60,13 @@ interface AppState {
   // Dice rolls (persisted - last 5 rolls)
   diceRolls: DiceRoll[]
 
-  // Theme preference (persisted)
-  theme: Theme
-
   // Actions
+  setTheme: (theme: Theme) => void
+  toggleTheme: () => void
   setMusicVolume: (volume: number) => void
   setEffectsVolume: (volume: number) => void
   updateSoundEffectButton: (id: string, updates: Partial<SoundEffectButton>) => void
   resetSoundEffectButtons: () => void
-
-  // Theme actions
-  setTheme: (theme: Theme) => void
-  toggleTheme: () => void
 
   // Music playback actions (loop is persisted)
   setMusicPlaying: (playing: boolean) => void
@@ -123,6 +121,9 @@ const defaultTimer: TimerState = {
 export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
+      // Default theme
+      theme: 'light' as Theme,
+
       // Default volume values
       musicVolume: 0.5,
       effectsVolume: 0.7,
@@ -139,8 +140,12 @@ export const useAppStore = create<AppState>()(
       // Default dice rolls (empty array)
       diceRolls: [],
 
-      // Default theme
-      theme: 'light' as Theme,
+      // Theme actions
+      setTheme: (theme) => set({ theme }),
+      toggleTheme: () =>
+        set((state) => ({
+          theme: state.theme === 'light' ? 'dark' : 'light',
+        })),
 
       // Volume actions
       setMusicVolume: (volume) => set({ musicVolume: volume }),
@@ -238,13 +243,6 @@ export const useAppStore = create<AppState>()(
 
       clearDiceHistory: () =>
         set({ diceRolls: [] }),
-
-      // Theme actions
-      setTheme: (theme) => set({ theme }),
-      toggleTheme: () =>
-        set((state) => ({
-          theme: state.theme === 'light' ? 'dark' : 'light',
-        })),
     }),
     {
       name: 'dashboardie-storage',
@@ -263,14 +261,14 @@ export const useAppStore = create<AppState>()(
           key: () => null,
         } as Storage;
       }),
-      // Persist volume settings, button configurations, and dice history
+      // Persist theme, volume settings, button configurations, and dice history
       // Music playback and timer state are runtime-only (resets on page load)
       partialize: (state) => ({
+        theme: state.theme,
         musicVolume: state.musicVolume,
         effectsVolume: state.effectsVolume,
         soundEffectButtons: state.soundEffectButtons,
         diceRolls: state.diceRolls,
-        theme: state.theme,
       }),
       skipHydration: true,
     }
