@@ -191,6 +191,15 @@ npm run build
 
 ---
 
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Module Development Guide](./docs/MODULE_DEVELOPMENT.md) | How to create custom modules/blocks |
+| [Style Guide](./docs/styleguide.md) | Design system specifications |
+
+---
+
 ## Contributing
 
 1. Fork the repository
@@ -198,6 +207,15 @@ npm run build
 3. Commit your changes (`git commit -m 'Add amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
+
+### Creating Custom Modules
+
+Want to add your own feature blocks? See the [Module Development Guide](./docs/MODULE_DEVELOPMENT.md) for a complete walkthrough covering:
+- Architecture overview
+- Step-by-step creation guide
+- Design system reference
+- State management patterns
+- Complete example with code
 
 ---
 

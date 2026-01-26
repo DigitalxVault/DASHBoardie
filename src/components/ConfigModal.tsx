@@ -5,6 +5,7 @@ import { GlassButton } from '@/components/ui/GlassButton';
 import { useAppStore } from '@/stores/appStore';
 import { type SoundEffectButton } from '@/stores/appStore';
 import { useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { audioManifest } from '@/generated/audio-manifest';
 
 // Available sound files - auto-generated from public/sounds/effects/
@@ -36,9 +37,9 @@ function ButtonConfigRow({ button, onUpdate, index }: ButtonConfigRowProps) {
   };
 
   return (
-    <div className="flex items-center gap-3 p-2 rounded-xl bg-[rgba(255,255,255,0.4)]">
+    <div className="flex items-center gap-3 p-2 rounded-xl bg-[rgba(255,255,255,0.4)] dark:bg-[rgba(60,60,80,0.5)]">
       {/* Button number */}
-      <span className="text-xs text-text-muted font-medium min-w-[2rem]">
+      <span className="text-sm text-text-secondary font-semibold min-w-[2rem]">
         #{index + 1}
       </span>
 
@@ -49,7 +50,8 @@ function ButtonConfigRow({ button, onUpdate, index }: ButtonConfigRowProps) {
         onChange={handleNameChange}
         className="
           flex-1 min-w-0 px-3 py-2 rounded-lg
-          bg-[rgba(255,255,255,0.8)] border border-[rgba(255,255,255,0.9)]
+          bg-[rgba(255,255,255,0.8)] dark:bg-[rgba(40,40,60,0.8)]
+          border border-[rgba(255,255,255,0.9)] dark:border-[rgba(255,255,255,0.15)]
           text-text-primary text-sm font-medium
           focus:outline-none focus:ring-[3px] focus:ring-[rgba(59,201,219,0.3)]
           placeholder:text-text-muted
@@ -63,7 +65,8 @@ function ButtonConfigRow({ button, onUpdate, index }: ButtonConfigRowProps) {
         onChange={handleFileChange}
         className="
           px-3 py-2 rounded-lg min-w-[140px]
-          bg-[rgba(255,255,255,0.8)] border border-[rgba(255,255,255,0.9)]
+          bg-[rgba(255,255,255,0.8)] dark:bg-[rgba(40,40,60,0.8)]
+          border border-[rgba(255,255,255,0.9)] dark:border-[rgba(255,255,255,0.15)]
           text-text-primary text-sm font-medium
           focus:outline-none focus:ring-[3px] focus:ring-[rgba(59,201,219,0.3)]
           cursor-pointer
@@ -114,7 +117,7 @@ export function ConfigModal({ isOpen, onClose }: ConfigModalProps) {
 
   if (!isOpen) return null;
 
-  return (
+  const modalContent = (
     <div
       onClick={handleBackdropClick}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
@@ -126,7 +129,7 @@ export function ConfigModal({ isOpen, onClose }: ConfigModalProps) {
             <h2 className="text-xl font-semibold text-text-primary">
               Configure Sound Effects
             </h2>
-            <p className="text-xs text-text-muted font-medium">
+            <p className="text-sm text-text-secondary font-medium">
               Edit button names and assign audio files
             </p>
           </div>
@@ -180,4 +183,10 @@ export function ConfigModal({ isOpen, onClose }: ConfigModalProps) {
       </GlassPanel>
     </div>
   );
+
+  // Portal to body so it's outside any CSS transforms from block scaling
+  if (typeof document !== 'undefined') {
+    return createPortal(modalContent, document.body);
+  }
+  return null;
 }

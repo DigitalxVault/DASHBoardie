@@ -169,7 +169,7 @@ function CountdownTimer() {
   }, [resetCountdown, initialTime]);
 
   const progress = initialTime > 0 ? countdownTime / initialTime : 1;
-  const circumference = 2 * Math.PI * 38; // r=38 (smaller ring)
+  const circumference = 2 * Math.PI * 58; // r=58 (larger ring for bigger digits)
   const strokeDashoffset = circumference * (1 - progress);
   const isLowTime = countdownTime <= 5 && countdownTime > 0;
 
@@ -177,29 +177,29 @@ function CountdownTimer() {
     <div className="flex flex-col h-full min-w-0">
       {/* Section Header */}
       <div className="flex items-center gap-1.5 mb-2">
-        <span className="text-[10px] text-text-muted font-medium tracking-wide">
+        <span className="text-sm text-text-secondary font-semibold tracking-wide">
           Countdown
         </span>
-        <span className="text-accent-cyan text-xs">↓</span>
+        <span className="text-accent-cyan text-sm">↓</span>
       </div>
 
-      {/* Compact Timer Ring */}
+      {/* Timer Ring */}
       <div className="flex flex-col items-center justify-center mb-3">
         <div className={`relative ${isLowTime && isRunning ? 'animate-pulse' : ''}`}>
-          <svg className="w-24 h-24 sm:w-28 sm:h-28 transform -rotate-90">
+          <svg className="w-36 h-36 sm:w-40 sm:h-40 transform -rotate-90">
             <circle
               cx="50%"
               cy="50%"
-              r="38"
+              r="58"
               fill="none"
               stroke="currentColor"
               className="text-[rgba(255,255,255,0.4)]"
-              strokeWidth="6"
+              strokeWidth="5"
             />
             <circle
               cx="50%"
               cy="50%"
-              r="38"
+              r="58"
               fill="none"
               stroke="currentColor"
               className={`transition-all duration-300 ${
@@ -209,7 +209,7 @@ function CountdownTimer() {
                   ? 'text-accent-coral'
                   : 'text-accent-cyan'
               }`}
-              strokeWidth="6"
+              strokeWidth="5"
               strokeDasharray={circumference}
               strokeDashoffset={strokeDashoffset}
               strokeLinecap="round"
@@ -217,14 +217,14 @@ function CountdownTimer() {
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span
-              className={`text-xl sm:text-2xl font-semibold tracking-wider ${
+              className={`text-3xl sm:text-4xl font-semibold tracking-wider ${
                 isLowTime ? 'text-accent-coral' : 'text-text-primary'
               }`}
             >
               {formatCountdownMain(countdownTime)}
             </span>
             <span
-              className={`text-xs tracking-wider ${
+              className={`text-sm tracking-wider ${
                 isLowTime ? 'text-accent-coral/70' : 'text-text-muted'
               }`}
             >
@@ -405,22 +405,22 @@ function Stopwatch() {
     <div className="flex flex-col h-full min-w-0">
       {/* Section Header */}
       <div className="flex items-center gap-1.5 mb-2">
-        <span className="text-[10px] text-text-muted font-medium tracking-wide">
+        <span className="text-sm text-text-secondary font-semibold tracking-wide">
           Stopwatch
         </span>
-        <span className="text-accent-teal text-xs">↑</span>
+        <span className="text-accent-teal text-sm">↑</span>
       </div>
 
       {/* Timer Display */}
       <div className="flex-1 flex flex-col items-center justify-center mb-3">
         <div className="text-center">
           <div className="flex items-baseline justify-center gap-0.5">
-            <span className={`text-2xl sm:text-3xl font-semibold tracking-wider ${
+            <span className={`text-3xl sm:text-4xl font-semibold tracking-wider ${
               localRunning ? 'text-accent-teal' : isPaused ? 'text-accent-teal/70' : 'text-text-primary'
             }`}>
               {formatStopwatchMain(stopwatchTime)}
             </span>
-            <span className={`text-sm ${
+            <span className={`text-base ${
               localRunning ? 'text-accent-teal/70' : 'text-text-muted'
             }`}>
               .{formatMilliseconds(localRunning || isPaused ? displayMs : 0)}

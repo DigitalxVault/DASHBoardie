@@ -184,17 +184,17 @@ export function DicePanel() {
 
         {/* Sum Display */}
         <div className="text-center py-2">
-          <span className="text-xs text-text-muted font-medium tracking-wide">
+          <span className="text-sm text-text-secondary font-semibold tracking-wide">
             Sum
           </span>
-          <div className="text-2xl sm:text-3xl font-semibold text-accent-teal">
+          <div className="text-3xl sm:text-4xl font-semibold text-accent-teal">
             {isRolling ? '-' : sum}
           </div>
         </div>
 
         {/* Roll History */}
         <div className="flex-1 overflow-hidden">
-          <div className="text-xs text-text-muted font-medium tracking-wide mb-2">
+          <div className="text-sm text-text-secondary font-semibold tracking-wide mb-2">
             Recent Rolls
           </div>
           {diceRolls.length === 0 ? (

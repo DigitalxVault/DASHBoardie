@@ -104,7 +104,7 @@ export function SoundEffectsPanel() {
             <div className="flex items-center gap-2">
               <GlassButton
                 size="sm"
-                variant="secondary"
+                variant="primary"
                 onClick={() => setIsConfigOpen(true)}
               >
                 Configure
