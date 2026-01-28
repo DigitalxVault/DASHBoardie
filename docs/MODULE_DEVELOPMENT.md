@@ -128,19 +128,7 @@ export const BLOCK_DEFAULTS: Record<BlockType, BlockSizeConstraints> = {
   },
 }
 
-// 3. Add display label
-export const BLOCK_LABELS: Record<BlockType, string> = {
-  // ... existing blocks ...
-  yourModule: 'Your Module Name',
-}
-
-// 4. Add icon name (from lucide-react)
-export const BLOCK_ICONS: Record<BlockType, string> = {
-  // ... existing blocks ...
-  yourModule: 'Sparkles',  // Any valid Lucide icon name
-}
-
-// 5. Import your icon and add metadata
+// 3. Import your icon and add metadata
 import { Timer, Dices, Volume2, Music, Sparkles, type LucideIcon } from 'lucide-react'
 
 export const BLOCK_METADATA: Record<BlockType, BlockMetadata> = {
@@ -593,10 +581,10 @@ Let's create a simple "Notes" module that allows users to write quick notes.
 ### Step 1: Update `src/types/canvas.ts`
 
 ```typescript
-import { Timer, Dices, Volume2, Music, StickyNote, type LucideIcon } from 'lucide-react'
-
+// 1. Add to BlockType union
 export type BlockType = 'timer' | 'dice' | 'soundEffects' | 'backgroundMusic' | 'notes'
 
+// 2. Add size constraints
 export const BLOCK_DEFAULTS: Record<BlockType, BlockSizeConstraints> = {
   // ... existing ...
   notes: {
@@ -605,15 +593,8 @@ export const BLOCK_DEFAULTS: Record<BlockType, BlockSizeConstraints> = {
   },
 }
 
-export const BLOCK_LABELS: Record<BlockType, string> = {
-  // ... existing ...
-  notes: 'Quick Notes',
-}
-
-export const BLOCK_ICONS: Record<BlockType, string> = {
-  // ... existing ...
-  notes: 'StickyNote',
-}
+// 3. Import icon and add metadata
+import { Timer, Dices, Volume2, Music, StickyNote, type LucideIcon } from 'lucide-react'
 
 export const BLOCK_METADATA: Record<BlockType, BlockMetadata> = {
   // ... existing ...

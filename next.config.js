@@ -34,8 +34,8 @@ const nextConfig = {
   output: 'export',
   images: { unoptimized: true },
   distDir: 'out',
-  // Use webpack instead of Turbopack for PWA compatibility
-  // Silence Turbopack warning since we explicitly use webpack for PWA
+  // Silence Turbopack warning - we use webpack for PWA compatibility
+  turbopack: {},
   webpack: (config, { isServer }) => {
     return config;
   },

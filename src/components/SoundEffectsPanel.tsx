@@ -147,11 +147,11 @@ export function SoundEffectsPanel() {
           </div>
 
           {/* Volume Control */}
-          <div className="pt-3 border-t border-[rgba(0,0,0,0.06)]">
-            <div className="flex items-center gap-3">
+          <div className="pt-3 border-t border-[rgba(0,0,0,0.1)] dark:border-[rgba(255,255,255,0.15)]">
+            <div className="flex items-center justify-center gap-3">
               {/* Volume icon */}
               <svg
-                className="w-5 h-5 text-text-muted"
+                className="w-5 h-5 text-text-muted flex-shrink-0"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -164,21 +164,38 @@ export function SoundEffectsPanel() {
                 />
               </svg>
 
-              {/* Volume slider */}
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.05"
-                value={effectsVolume}
-                onChange={(e) => setEffectsVolume(parseFloat(e.target.value))}
-                className="flex-1 h-2 cursor-pointer"
-              />
+              {/* Minus button - changes displayed % by 5 */}
+              <GlassButton
+                size="sm"
+                variant="primary"
+                onClick={() => {
+                  const currentLinear = Math.sqrt(effectsVolume);
+                  const newLinear = Math.max(0, currentLinear - 0.05);
+                  setEffectsVolume(newLinear * newLinear);
+                }}
+                disabled={effectsVolume <= 0}
+              >
+                −
+              </GlassButton>
 
               {/* Volume percentage */}
-              <span className="text-sm text-text-secondary font-medium min-w-[3rem] text-right">
-                {Math.round(effectsVolume * 100)}%
+              <span className="text-sm text-text-secondary font-semibold min-w-[3rem] text-center">
+                {Math.round(Math.sqrt(effectsVolume) * 100)}%
               </span>
+
+              {/* Plus button - changes displayed % by 5 */}
+              <GlassButton
+                size="sm"
+                variant="primary"
+                onClick={() => {
+                  const currentLinear = Math.sqrt(effectsVolume);
+                  const newLinear = Math.min(1, currentLinear + 0.05);
+                  setEffectsVolume(newLinear * newLinear);
+                }}
+                disabled={effectsVolume >= 1}
+              >
+                +
+              </GlassButton>
             </div>
           </div>
         </div>

@@ -231,7 +231,13 @@ function MusicPlayer({
             {formatTime(displayDuration)}
           </span>
         </div>
-        <div className="relative">
+        {/* Seek slider - capture phase handlers prevent React Flow drag */}
+        <div
+          className="relative nodrag nopan"
+          onPointerDownCapture={(e) => e.stopPropagation()}
+          onMouseDownCapture={(e) => e.stopPropagation()}
+          onTouchStartCapture={(e) => e.stopPropagation()}
+        >
           {/* Background track */}
           <GlassWell className="h-2 overflow-hidden absolute inset-x-0 top-1/2 -translate-y-1/2 pointer-events-none">
             <div
@@ -247,7 +253,7 @@ function MusicPlayer({
             step="0.001"
             value={progress}
             onChange={handleSeek}
-            className="w-full h-2 cursor-pointer relative z-10 opacity-0 hover:opacity-100"
+            className="w-full h-2 cursor-pointer relative z-10 opacity-0 hover:opacity-100 nodrag nopan"
             style={{ background: 'transparent' }}
           />
         </div>
@@ -303,13 +309,6 @@ export function BackgroundMusic() {
       setCurrentTrack(newTrack);
     },
     [setCurrentTrack, setMusicPlaying, setMusicProgress, setMusicDuration]
-  );
-
-  const handleVolumeChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setMusicVolume(parseFloat(e.target.value));
-    },
-    [setMusicVolume]
   );
 
   const handleLoopChange = useCallback(
@@ -399,11 +398,11 @@ export function BackgroundMusic() {
         )}
 
         {/* Volume Control */}
-        <div className="pt-3 border-t border-[rgba(0,0,0,0.06)] mt-auto">
-          <div className="flex items-center gap-3">
+        <div className="pt-3 border-t border-[rgba(0,0,0,0.1)] dark:border-[rgba(255,255,255,0.15)] mt-auto">
+          <div className="flex items-center justify-center gap-3">
             {/* Volume icon */}
             <svg
-              className="w-5 h-5 text-text-muted"
+              className="w-5 h-5 text-text-muted flex-shrink-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -416,21 +415,38 @@ export function BackgroundMusic() {
               />
             </svg>
 
-            {/* Volume slider */}
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.05"
-              value={musicVolume}
-              onChange={handleVolumeChange}
-              className="flex-1 h-2 cursor-pointer"
-            />
+            {/* Minus button - changes displayed % by 5 */}
+            <GlassButton
+              size="sm"
+              variant="primary"
+              onClick={() => {
+                const currentLinear = Math.sqrt(musicVolume);
+                const newLinear = Math.max(0, currentLinear - 0.05);
+                setMusicVolume(newLinear * newLinear);
+              }}
+              disabled={musicVolume <= 0}
+            >
+              −
+            </GlassButton>
 
             {/* Volume percentage */}
-            <span className="text-sm text-text-secondary font-medium min-w-[3rem] text-right">
-              {Math.round(musicVolume * 100)}%
+            <span className="text-sm text-text-secondary font-semibold min-w-[3rem] text-center">
+              {Math.round(Math.sqrt(musicVolume) * 100)}%
             </span>
+
+            {/* Plus button - changes displayed % by 5 */}
+            <GlassButton
+              size="sm"
+              variant="primary"
+              onClick={() => {
+                const currentLinear = Math.sqrt(musicVolume);
+                const newLinear = Math.min(1, currentLinear + 0.05);
+                setMusicVolume(newLinear * newLinear);
+              }}
+              disabled={musicVolume >= 1}
+            >
+              +
+            </GlassButton>
           </div>
         </div>
       </div>

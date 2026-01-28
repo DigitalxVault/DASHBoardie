@@ -4,7 +4,6 @@ import { useCallback } from 'react'
 import { GripVertical } from 'lucide-react'
 import { type BlockType, BLOCK_METADATA } from '@/types/canvas'
 import { cn } from '@/lib/utils'
-import { FeaturePreview } from './FeaturePreview'
 
 interface FeatureNavItemProps {
   type: BlockType
@@ -31,7 +30,7 @@ export function FeatureNavItem({ type, isCollapsed }: FeatureNavItemProps) {
           'w-10 h-10 rounded-lg cursor-grab active:cursor-grabbing',
           'flex items-center justify-center',
           'bg-[rgba(255,255,255,0.5)] dark:bg-[rgba(40,40,60,0.5)]',
-          'border border-[rgba(255,255,255,0.6)] dark:border-[rgba(255,255,255,0.1)]',
+          'border border-[rgba(255,255,255,0.6)] dark:border-[rgba(255,255,255,0.2)]',
           'hover:bg-[rgba(255,255,255,0.7)] dark:hover:bg-[rgba(50,50,70,0.6)]',
           'transition-all duration-150',
           'group'
@@ -58,22 +57,31 @@ export function FeatureNavItem({ type, isCollapsed }: FeatureNavItemProps) {
       className={cn(
         'rounded-xl cursor-grab active:cursor-grabbing',
         'bg-[rgba(255,255,255,0.5)] dark:bg-[rgba(40,40,60,0.5)]',
-        'border border-[rgba(255,255,255,0.6)] dark:border-[rgba(255,255,255,0.1)]',
+        'border border-[rgba(255,255,255,0.6)] dark:border-[rgba(255,255,255,0.2)]',
         'hover:bg-[rgba(255,255,255,0.7)] dark:hover:bg-[rgba(50,50,70,0.6)]',
         'hover:border-[rgba(59,201,219,0.5)]',
         'transition-all duration-150',
         'overflow-hidden',
-        'group'
+        'group',
+        'p-2'
       )}
     >
-      {/* Preview area */}
-      <div className="p-2">
-        <FeaturePreview type={type} />
-      </div>
+      {/* Compact horizontal layout: icon + text */}
+      <div className="flex items-center gap-3">
+        <GripVertical className="w-4 h-4 text-[#8A8A9A] group-hover:text-[#3BC9DB] transition-colors flex-shrink-0" />
 
-      {/* Info area */}
-      <div className="px-3 pb-3 flex items-center gap-2">
-        <GripVertical className="w-4 h-4 text-[#8A8A9A] group-hover:text-[#3BC9DB] transition-colors" />
+        {/* Icon badge */}
+        <div
+          className={cn(
+            'w-10 h-10 rounded-lg flex-shrink-0',
+            'flex items-center justify-center',
+            metadata.colorClass
+          )}
+        >
+          <metadata.icon className="w-5 h-5" />
+        </div>
+
+        {/* Text info */}
         <div className="flex-1 min-w-0">
           <h4 className="text-sm font-semibold text-[#2A2A3A] dark:text-[#F5F5FA] truncate">
             {metadata.name}

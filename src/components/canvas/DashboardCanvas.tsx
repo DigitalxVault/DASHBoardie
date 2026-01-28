@@ -31,11 +31,12 @@ function blockToNode(block: BlockInstance): Node {
     id: block.id,
     type: 'block',
     position: { x: block.position.x, y: block.position.y },
+    // Width/height on node level lets NodeResizer control sizing during resize
+    width: block.size.width,
+    height: block.size.height,
     data: {
       type: block.type,
       rotation: block.rotation,
-      width: block.size.width,
-      height: block.size.height,
     },
     style: {
       zIndex: block.zIndex,
@@ -75,20 +76,13 @@ function DashboardCanvasInner({ onDropBlock }: DashboardCanvasInnerProps) {
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
 
-  // Sync nodes when blocks change
+  // Sync nodes when blocks or selection change - preserves selection during updates
   useEffect(() => {
-    setNodes(blocks.map(blockToNode))
-  }, [blocks, setNodes])
-
-  // Sync selection state
-  useEffect(() => {
-    setNodes((nds) =>
-      nds.map((node) => ({
-        ...node,
-        selected: selectedBlockIds.includes(node.id),
-      }))
-    )
-  }, [selectedBlockIds, setNodes])
+    setNodes(blocks.map(block => ({
+      ...blockToNode(block),
+      selected: selectedBlockIds.includes(block.id),
+    })))
+  }, [blocks, selectedBlockIds, setNodes])
 
   // Handle node changes (position, selection)
   const handleNodesChange: OnNodesChange = useCallback(
@@ -128,6 +122,27 @@ function DashboardCanvasInner({ onDropBlock }: DashboardCanvasInnerProps) {
     deselectAll()
   }, [deselectAll])
 
+  // Prevent node drag when clicking on interactive elements like sliders
+  const handleNodeDragStart = useCallback(
+    (event: React.MouseEvent) => {
+      const target = event.target as HTMLElement
+      // Only prevent drag for form elements, NOT for .nodrag/.nopan
+      // React Flow handles .nodrag internally, and NodeResizer needs those events
+      if (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'BUTTON' ||
+        target.tagName === 'SELECT' ||
+        target.closest('input') ||
+        target.closest('button') ||
+        target.closest('select')
+      ) {
+        event.stopPropagation()
+        event.preventDefault()
+      }
+    },
+    []
+  )
+
   // Handle viewport changes
   const handleMoveEnd = useCallback(
     (_event: unknown, viewport: { x: number; y: number; zoom: number }) => {
@@ -165,12 +180,19 @@ function DashboardCanvasInner({ onDropBlock }: DashboardCanvasInnerProps) {
     event.dataTransfer.dropEffect = 'copy'
   }, [])
 
-  // Fit view on initial load
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      fitView({ duration: 0, padding: 0.1 })
+  // Fit view when React Flow initializes - ensures all modules are visible
+  const handleInit = useCallback(() => {
+    // Multiple delayed calls to ensure fitView works after transitions
+    // First call immediately
+    fitView({ padding: 0.15, duration: 0 })
+    // Second call after short delay for any layout shifts
+    setTimeout(() => {
+      fitView({ padding: 0.15, duration: 300 })
     }, 100)
-    return () => clearTimeout(timer)
+    // Third call after longer delay to handle slow renders
+    setTimeout(() => {
+      fitView({ padding: 0.15, duration: 200 })
+    }, 500)
   }, [fitView])
 
   return (
@@ -187,13 +209,15 @@ function DashboardCanvasInner({ onDropBlock }: DashboardCanvasInnerProps) {
         onSelectionChange={handleSelectionChange}
         onPaneClick={handlePaneClick}
         onMoveEnd={handleMoveEnd}
+        onNodeDragStart={handleNodeDragStart}
+        onInit={handleInit}
         nodeTypes={nodeTypes}
-        defaultViewport={viewport}
         snapToGrid={true}
         snapGrid={[gridSize, gridSize]}
         minZoom={CANVAS_CONFIG.minZoom}
         maxZoom={CANVAS_CONFIG.maxZoom}
-        fitView={false}
+        fitView={true}
+        fitViewOptions={{ padding: 0.15 }}
         panOnDrag={true}
         zoomOnScroll={true}
         zoomOnPinch={true}
@@ -204,6 +228,8 @@ function DashboardCanvasInner({ onDropBlock }: DashboardCanvasInnerProps) {
         deleteKeyCode={null} // We'll handle delete ourselves
         className="touch-none"
         proOptions={{ hideAttribution: true }}
+        noDragClassName="nodrag"
+        noPanClassName="nopan"
       >
         <CanvasBackground showGrid={showGrid} gridSize={gridSize} />
         <CanvasMinimap />

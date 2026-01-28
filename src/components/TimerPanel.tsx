@@ -77,7 +77,7 @@ function CountdownTimer() {
   }, [countdownTime, isRunning, isPaused]);
 
   // Alert sound for timer zero
-  const [playAlert] = useSound('/sounds/effects/Alien%20Same%20Zone.mp3', {
+  const [playAlert] = useSound('/sounds/effects/AlienSameZone_v2.mp3', {
     volume: 1.0,
     html5: true,
   });

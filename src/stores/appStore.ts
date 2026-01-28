@@ -31,9 +31,10 @@ interface TimerState {
 // Dice roll state
 export interface DiceRoll {
   id: string
-  dice1: number // 1-6
-  dice2: number // 1-6
-  sum: number // 2-12
+  dice1: number // 1-6 (legacy, kept for backward compatibility)
+  dice2: number // 1-6 (legacy, kept for backward compatibility)
+  diceValues?: number[] // Array of dice values (1-6 each)
+  sum: number
   timestamp: number
 }
 
@@ -59,6 +60,9 @@ interface AppState {
 
   // Dice rolls (persisted - last 5 rolls)
   diceRolls: DiceRoll[]
+
+  // Dice configuration (persisted)
+  diceCount: number // 1-6 dice
 
   // Actions
   setTheme: (theme: Theme) => void
@@ -88,6 +92,7 @@ interface AppState {
   // Dice actions
   addDiceRoll: (roll: DiceRoll) => void
   clearDiceHistory: () => void
+  setDiceCount: (count: number) => void
 }
 
 // Default sound effect buttons
@@ -139,6 +144,9 @@ export const useAppStore = create<AppState>()(
 
       // Default dice rolls (empty array)
       diceRolls: [],
+
+      // Default dice count
+      diceCount: 2,
 
       // Theme actions
       setTheme: (theme) => set({ theme }),
@@ -243,6 +251,9 @@ export const useAppStore = create<AppState>()(
 
       clearDiceHistory: () =>
         set({ diceRolls: [] }),
+
+      setDiceCount: (count) =>
+        set({ diceCount: Math.max(1, Math.min(6, count)) }),
     }),
     {
       name: 'dashboardie-storage',
@@ -269,6 +280,7 @@ export const useAppStore = create<AppState>()(
         effectsVolume: state.effectsVolume,
         soundEffectButtons: state.soundEffectButtons,
         diceRolls: state.diceRolls,
+        diceCount: state.diceCount,
       }),
       skipHydration: true,
     }

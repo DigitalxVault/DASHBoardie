@@ -2,10 +2,10 @@
 
 import { memo, useCallback, lazy, Suspense } from 'react'
 import type { NodeProps } from '@xyflow/react'
-import { NodeResizer } from '@xyflow/react'
 import { cn } from '@/lib/utils'
 import { useCanvasStore } from '@/stores/canvasStore'
-import { BLOCK_DEFAULTS, type BlockType } from '@/types/canvas'
+import type { BlockType } from '@/types/canvas'
+import { X } from 'lucide-react'
 
 // Lazy load block components to avoid circular dependencies
 const TimerBlock = lazy(() => import('@/components/blocks/TimerBlock').then(m => ({ default: m.TimerBlock })))
@@ -16,8 +16,6 @@ const BackgroundMusicBlock = lazy(() => import('@/components/blocks/BackgroundMu
 interface BlockNodeData {
   type: BlockType
   rotation: number
-  width: number
-  height: number
 }
 
 // Use a type assertion to satisfy React Flow v12's strict NodeProps constraint
@@ -51,22 +49,12 @@ function BlockContent({ type }: { type: BlockType }) {
 export const BlockNode = memo(function BlockNode(props: BlockNodeProps) {
   const { id, data, selected } = props
   const typedData = data as unknown as BlockNodeData
-  const updateBlockSize = useCanvasStore((state) => state.updateBlockSize)
   const bringToFront = useCanvasStore((state) => state.bringToFront)
-
-  const minSize = BLOCK_DEFAULTS[typedData.type].min
-
-  const handleResizeEnd = useCallback(
-    (_event: unknown, params: { width: number; height: number }) => {
-      updateBlockSize(id, {
-        width: params.width,
-        height: params.height,
-      })
-    },
-    [id, updateBlockSize]
-  )
+  const removeBlock = useCanvasStore((state) => state.removeBlock)
 
   const handleMouseDown = useCallback(() => {
+    // Just bring block to front on any interaction
+    // Do NOT call stopPropagation - React Flow handles drag prevention via noDragClassName
     bringToFront(id)
   }, [id, bringToFront])
 
@@ -76,27 +64,34 @@ export const BlockNode = memo(function BlockNode(props: BlockNodeProps) {
     : undefined
 
   return (
+    // Use w-full h-full to fill React Flow's node container
     <div
       className={cn(
-        'relative',
+        'relative w-full h-full',
         'transition-shadow duration-200',
         selected && 'ring-2 ring-[#3BC9DB] ring-offset-2 ring-offset-transparent rounded-[20px]'
       )}
-      style={{
-        width: typedData.width,
-        height: typedData.height,
-        ...rotationStyle,
-      }}
-      onMouseDown={handleMouseDown}
+      style={rotationStyle}
+      onPointerDownCapture={handleMouseDown}
     >
-      <NodeResizer
-        minWidth={minSize.width}
-        minHeight={minSize.height}
-        isVisible={selected}
-        lineClassName="!border-[#3BC9DB]"
-        handleClassName="!w-3 !h-3 !bg-[#3BC9DB] !border-2 !border-white !rounded-md"
-        onResizeEnd={handleResizeEnd}
-      />
+      {/* Delete button - appears when block is selected */}
+      {selected && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            removeBlock(id)
+          }}
+          className="absolute -top-3 -right-3 z-[9999] w-8 h-8 rounded-full
+                     bg-red-500 hover:bg-red-600 active:bg-red-700
+                     text-white flex items-center justify-center
+                     shadow-lg transition-colors cursor-pointer
+                     nodrag nopan"
+          title="Delete block"
+          aria-label="Delete block"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      )}
 
       {/* Block content - the panels have their own GlassPanel styling */}
       <div className="w-full h-full overflow-hidden rounded-[20px]">

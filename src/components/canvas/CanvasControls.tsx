@@ -35,9 +35,8 @@ export function CanvasControls({ className }: CanvasControlsProps) {
   }
 
   const handleReset = () => {
-    if (window.confirm('Reset canvas to default layout? This will remove all blocks and restore defaults.')) {
+    if (window.confirm('Clear canvas? This will remove all blocks.')) {
       resetCanvas()
-      setTimeout(() => fitView({ duration: 300, padding: 0.1 }), 100)
     }
   }
 

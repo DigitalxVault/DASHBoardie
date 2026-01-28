@@ -36,7 +36,7 @@ interface CanvasState {
   removeBlocks: (ids: string[]) => void
   updateBlock: (id: string, updates: Partial<Omit<BlockInstance, 'id' | 'type'>>) => void
   updateBlockPosition: (id: string, position: Position) => void
-  updateBlockSize: (id: string, size: Size) => void
+  updateBlockSize: (id: string, size: Size, position?: Position) => void
   rotateBlock: (id: string, direction: 'cw' | 'ccw') => void
   duplicateBlock: (id: string) => string | null
   duplicateBlocks: (ids: string[]) => string[]
@@ -186,7 +186,7 @@ export const useCanvasStore = create<CanvasState>()(
         }))
       },
 
-      updateBlockSize: (id, size) => {
+      updateBlockSize: (id, size, position) => {
         const block = get().blocks.find((b) => b.id === id)
         if (!block) return
 
@@ -200,6 +200,10 @@ export const useCanvasStore = create<CanvasState>()(
                     width: Math.max(minSize.width, size.width),
                     height: Math.max(minSize.height, size.height),
                   },
+                  // Update position if provided (for corner resizes that shift position)
+                  ...(position && {
+                    position: { x: position.x, y: position.y },
+                  }),
                 }
               : b
           ),
@@ -353,7 +357,7 @@ export const useCanvasStore = create<CanvasState>()(
       // Canvas actions
       resetCanvas: () => {
         set({
-          blocks: createDefaultBlocks(),
+          blocks: [],
           viewport: defaultViewport,
           selectedBlockIds: [],
         })
@@ -391,10 +395,10 @@ export const useCanvasStore = create<CanvasState>()(
           key: () => null,
         } as Storage
       }),
-      // Persist everything except selection (runtime state)
+      // Persist blocks and UI settings, but NOT viewport
+      // Viewport resets each session so fitView can center modules properly
       partialize: (state) => ({
         blocks: state.blocks,
-        viewport: state.viewport,
         isNavCollapsed: state.isNavCollapsed,
         gridSize: state.gridSize,
         showGrid: state.showGrid,

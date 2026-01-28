@@ -55,22 +55,6 @@ export const BLOCK_DEFAULTS: Record<BlockType, BlockSizeConstraints> = {
   },
 }
 
-// Block display names for UI
-export const BLOCK_LABELS: Record<BlockType, string> = {
-  timer: 'Timer',
-  dice: 'Dice Roller',
-  soundEffects: 'Sound Effects',
-  backgroundMusic: 'Background Music',
-}
-
-// Block icons (Lucide icon names)
-export const BLOCK_ICONS: Record<BlockType, string> = {
-  timer: 'Timer',
-  dice: 'Dice5',
-  soundEffects: 'Volume2',
-  backgroundMusic: 'Music',
-}
-
 // Import Lucide icons for use in components
 import { Timer, Dices, Volume2, Music, type LucideIcon } from 'lucide-react'
 

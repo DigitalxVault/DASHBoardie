@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="384" height="384" viewBox="0 0 384 384" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3BC9DB;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#38D9A9;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="384" height="384" rx="84.48" fill="url(#grad)"/>
+  <rect x="38.400000000000006" y="38.400000000000006" width="307.20000000000005" height="307.20000000000005" rx="57.599999999999994" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="7.68"/>
+  <text x="50%" y="52%" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-weight="bold" font-size="153.60000000000002" fill="white">DB</text>
+</svg>

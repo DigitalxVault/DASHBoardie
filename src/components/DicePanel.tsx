@@ -1,9 +1,11 @@
 'use client';
 
-import { GlassPanel, GlassWell } from '@/components/ui/GlassPanel';
+import { GlassPanel } from '@/components/ui/GlassPanel';
+import { GlassButton } from '@/components/ui/GlassButton';
 import { useAppStore, type DiceRoll } from '@/stores/appStore';
 import { useSound } from 'use-sound';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useRef, useEffect } from 'react';
+import { Settings, Minus, Plus, X } from 'lucide-react';
 
 // Dot positions for each dice value (1-6)
 // Grid positions: tl=top-left, tc=top-center, tr=top-right, ml=mid-left, mc=mid-center, mr=mid-right, bl=bot-left, bc=bot-center, br=bot-right
@@ -29,12 +31,9 @@ const POSITION_CLASSES: Record<string, string> = {
   br: 'bottom-1.5 right-1.5',
 };
 
-// Generate random dice roll (1-6)
-function rollDice(): [number, number] {
-  return [
-    Math.floor(Math.random() * 6) + 1,
-    Math.floor(Math.random() * 6) + 1,
-  ];
+// Generate random dice rolls
+function rollDice(count: number): number[] {
+  return Array.from({ length: count }, () => Math.floor(Math.random() * 6) + 1);
 }
 
 // Generate unique ID
@@ -59,7 +58,7 @@ function DiceFace({ value, isRolling }: { value: number; isRolling: boolean }) {
 
   if (isRolling) {
     return (
-      <span className="text-4xl sm:text-5xl text-text-muted animate-blur">?</span>
+      <span className="text-3xl sm:text-4xl text-text-muted animate-blur">?</span>
     );
   }
 
@@ -69,7 +68,7 @@ function DiceFace({ value, isRolling }: { value: number; isRolling: boolean }) {
         <div
           key={idx}
           className={`
-            absolute w-3 h-3 sm:w-4 sm:h-4 rounded-full
+            absolute w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full
             ${dotColor}
             shadow-[inset_0_-1px_2px_rgba(0,0,0,0.3)]
             ${POSITION_CLASSES[pos]}
@@ -80,14 +79,18 @@ function DiceFace({ value, isRolling }: { value: number; isRolling: boolean }) {
   );
 }
 
-// Animated Die Component
-function AnimatedDie({ value, isRolling }: { value: number; isRolling: boolean }) {
+// Animated Die Component - smaller size to fit more dice
+function AnimatedDie({ value, isRolling, size = 'normal' }: { value: number; isRolling: boolean; size?: 'small' | 'normal' }) {
+  const sizeClasses = size === 'small'
+    ? 'w-14 h-14 sm:w-16 sm:h-16'
+    : 'w-16 h-16 sm:w-20 sm:h-20';
+
   return (
     <div
       className={`
-        relative w-20 h-20 sm:w-24 sm:h-24
-        bg-[#f5f0e6] rounded-2xl
-        shadow-[0_6px_12px_rgba(0,0,0,0.15),inset_0_2px_0_rgba(255,255,255,0.8),inset_0_-2px_4px_rgba(0,0,0,0.1)]
+        relative ${sizeClasses}
+        bg-[#f5f0e6] rounded-xl
+        shadow-[0_4px_8px_rgba(0,0,0,0.15),inset_0_2px_0_rgba(255,255,255,0.8),inset_0_-2px_4px_rgba(0,0,0,0.1)]
         border-2 border-[#e0dbd0]
         transition-all duration-150
         ${isRolling ? 'animate-shake' : ''}
@@ -98,12 +101,101 @@ function AnimatedDie({ value, isRolling }: { value: number; isRolling: boolean }
   );
 }
 
+// Settings Popover Component
+function SettingsPopover({
+  isOpen,
+  onClose,
+  diceCount,
+  onDiceCountChange
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  diceCount: number;
+  onDiceCountChange: (count: number) => void;
+}) {
+  const popoverRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    }
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div
+      ref={popoverRef}
+      className="absolute right-0 top-full mt-2 z-50 rounded-xl bg-[rgba(255,255,255,0.9)] dark:bg-[rgba(30,30,50,0.95)] backdrop-blur-[20px] border border-[rgba(255,255,255,0.85)] dark:border-[rgba(255,255,255,0.15)] shadow-[0_8px_32px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)] p-4 min-w-[200px]"
+    >
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-sm font-semibold text-[#2A2A3A] dark:text-[#F5F5FA]">Dice Settings</h3>
+        <button
+          onClick={onClose}
+          className="p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+        >
+          <X className="w-4 h-4 text-[#6A6A7A] dark:text-[#9A9AAA]" />
+        </button>
+      </div>
+
+      <div className="space-y-3">
+        <div>
+          <label className="text-xs text-[#6A6A7A] dark:text-[#9A9AAA] font-medium">
+            Number of Dice
+          </label>
+          <div className="flex items-center gap-3 mt-2">
+            <GlassButton
+              size="sm"
+              variant="primary"
+              onClick={() => onDiceCountChange(diceCount - 1)}
+              disabled={diceCount <= 1}
+              className="!p-2"
+            >
+              <Minus className="w-4 h-4" />
+            </GlassButton>
+            <span className="text-lg font-bold text-[#2A2A3A] dark:text-[#F5F5FA] min-w-[2rem] text-center">
+              {diceCount}
+            </span>
+            <GlassButton
+              size="sm"
+              variant="primary"
+              onClick={() => onDiceCountChange(diceCount + 1)}
+              disabled={diceCount >= 6}
+              className="!p-2"
+            >
+              <Plus className="w-4 h-4" />
+            </GlassButton>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function DicePanel() {
-  const { diceRolls, addDiceRoll, clearDiceHistory } = useAppStore();
-  const [dice1, setDice1] = useState(1);
-  const [dice2, setDice2] = useState(1);
+  const { diceRolls, addDiceRoll, clearDiceHistory, diceCount, setDiceCount } = useAppStore();
+  const [diceValues, setDiceValues] = useState<number[]>(() => Array(diceCount).fill(1));
   const [isRolling, setIsRolling] = useState(false);
-  const [sum, setSum] = useState(2);
+  const [sum, setSum] = useState(diceCount);
+  const [showSettings, setShowSettings] = useState(false);
+
+  // Update dice values array when dice count changes
+  useEffect(() => {
+    setDiceValues(prev => {
+      if (prev.length === diceCount) return prev;
+      if (prev.length < diceCount) {
+        return [...prev, ...Array(diceCount - prev.length).fill(1)];
+      }
+      return prev.slice(0, diceCount);
+    });
+    setSum(diceCount); // Reset sum to default
+  }, [diceCount]);
 
   // Roll sound effect - using available sound file
   const [playRollSound] = useSound('/sounds/effects/Roll%20Dice.mp3', {
@@ -123,46 +215,68 @@ export function DicePanel() {
 
     // Generate results after animation
     setTimeout(() => {
-      const [d1, d2] = rollDice();
-      setDice1(d1);
-      setDice2(d2);
-      setSum(d1 + d2);
+      const newValues = rollDice(diceCount);
+      const newSum = newValues.reduce((a, b) => a + b, 0);
+      setDiceValues(newValues);
+      setSum(newSum);
       setIsRolling(false);
 
-      // Add to history
+      // Add to history (with backward compatibility)
       addDiceRoll({
         id: generateId(),
-        dice1: d1,
-        dice2: d2,
-        sum: d1 + d2,
+        dice1: newValues[0] || 0,
+        dice2: newValues[1] || 0,
+        diceValues: newValues,
+        sum: newSum,
         timestamp: Date.now(),
       });
     }, 500);
-  }, [isRolling, playRollSound, addDiceRoll]);
+  }, [isRolling, playRollSound, addDiceRoll, diceCount]);
 
   const handleClearHistory = useCallback(() => {
     clearDiceHistory();
   }, [clearDiceHistory]);
 
-  // Get last roll (most recent) for display
-  const lastRoll = diceRolls[0];
+  // Determine dice size based on count
+  const diceSize = diceCount > 3 ? 'small' : 'normal';
+
+  // Get dice values for a roll (backward compatible)
+  const getRollValues = (roll: DiceRoll): number[] => {
+    if (roll.diceValues) return roll.diceValues;
+    return [roll.dice1, roll.dice2];
+  };
 
   return (
     <GlassPanel variant="frosted" className="h-full">
       <div className="flex flex-col h-full">
         {/* Panel Header */}
-        <div className="flex items-center justify-between mb-4 pb-3 border-b border-[rgba(0,0,0,0.06)]">
+        <div className="flex items-center justify-between mb-4 pb-3 border-b border-[rgba(0,0,0,0.06)] relative">
           <h2 className="text-lg font-semibold text-text-primary">
             Dice
           </h2>
-          {diceRolls.length > 0 && (
+          <div className="flex items-center gap-2">
+            {diceRolls.length > 0 && (
+              <button
+                onClick={handleClearHistory}
+                className="text-xs font-medium text-text-muted hover:text-accent-coral transition-colors"
+              >
+                Clear
+              </button>
+            )}
             <button
-              onClick={handleClearHistory}
-              className="text-xs font-medium text-text-muted hover:text-accent-coral transition-colors"
+              onClick={() => setShowSettings(!showSettings)}
+              className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+              title="Dice Settings"
             >
-              Clear
+              <Settings className="w-4 h-4 text-[#6A6A7A] dark:text-[#9A9AAA]" />
             </button>
-          )}
+          </div>
+          <SettingsPopover
+            isOpen={showSettings}
+            onClose={() => setShowSettings(false)}
+            diceCount={diceCount}
+            onDiceCountChange={setDiceCount}
+          />
         </div>
 
         {/* Dice Area - Tap to roll */}
@@ -170,7 +284,7 @@ export function DicePanel() {
           onClick={handleRoll}
           disabled={isRolling}
           className={`
-            flex-1 min-h-[160px] flex items-center justify-center gap-6 sm:gap-10
+            flex-1 min-h-[140px] flex items-center justify-center gap-3 sm:gap-4 flex-wrap p-4
             bg-[rgba(255,255,255,0.4)] rounded-2xl border-2 border-dashed border-[rgba(255,255,255,0.6)]
             hover:border-accent-teal/50 hover:bg-[rgba(255,255,255,0.5)]
             transition-all duration-150 cursor-pointer will-change-transform
@@ -178,8 +292,9 @@ export function DicePanel() {
             ${!isRolling ? 'active:scale-[0.98]' : ''}
           `}
         >
-          <AnimatedDie value={dice1} isRolling={isRolling} />
-          <AnimatedDie value={dice2} isRolling={isRolling} />
+          {diceValues.map((value, index) => (
+            <AnimatedDie key={index} value={value} isRolling={isRolling} size={diceSize} />
+          ))}
         </button>
 
         {/* Sum Display */}
@@ -202,26 +317,30 @@ export function DicePanel() {
               No rolls yet
             </div>
           ) : (
-            <div className="space-y-1 overflow-y-auto max-h-[120px]">
-              {diceRolls.map((roll) => (
-                <div
-                  key={roll.id}
-                  className="flex items-center justify-between py-1 px-2 rounded-lg bg-[rgba(255,255,255,0.4)] text-text-secondary text-xs"
-                >
-                  <span>
-                    <span className={roll.dice1 === 1 || roll.dice1 === 4 ? 'text-[#FF0000] font-bold' : 'text-[#0000ff] font-bold'}>
-                      {roll.dice1}
+            <div className="space-y-1 overflow-y-auto max-h-[100px]">
+              {diceRolls.map((roll) => {
+                const values = getRollValues(roll);
+                return (
+                  <div
+                    key={roll.id}
+                    className="flex items-center justify-between py-1 px-2 rounded-lg bg-[rgba(255,255,255,0.4)] text-text-secondary text-xs"
+                  >
+                    <span>
+                      {values.map((v, i) => (
+                        <span key={i}>
+                          {i > 0 && ' + '}
+                          <span className={v === 1 || v === 4 ? 'text-[#FF0000] font-bold' : 'text-[#0000ff] font-bold'}>
+                            {v}
+                          </span>
+                        </span>
+                      ))}
+                      {' = '}
+                      <span className="text-accent-teal font-semibold ml-1">{roll.sum}</span>
                     </span>
-                    {' + '}
-                    <span className={roll.dice2 === 1 || roll.dice2 === 4 ? 'text-[#FF0000] font-bold' : 'text-[#0000ff] font-bold'}>
-                      {roll.dice2}
-                    </span>
-                    {' = '}
-                    <span className="text-accent-teal font-semibold ml-1">{roll.sum}</span>
-                  </span>
-                  <span className="text-text-muted">{formatTimestamp(roll.timestamp)}</span>
-                </div>
-              ))}
+                    <span className="text-text-muted">{formatTimestamp(roll.timestamp)}</span>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

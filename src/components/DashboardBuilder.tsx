@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState, lazy, Suspense } from 'react'
-import Image from 'next/image'
 import { useCanvasStore } from '@/stores/canvasStore'
 
 // Lazy load heavy canvas components
@@ -10,11 +9,17 @@ const DashboardCanvas = lazy(() => import('@/components/canvas').then(m => ({ de
 // Light components loaded normally
 import { FeatureNav } from '@/components/nav'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
+import { Logo } from '@/components/ui/Logo'
+import { Home } from 'lucide-react'
 import { ContextMenu, useContextMenu } from '@/components/ui/ContextMenu'
 import { useCanvasShortcuts } from '@/hooks/useCanvasShortcuts'
 import { cn } from '@/lib/utils'
 
-export function DashboardBuilder() {
+interface DashboardBuilderProps {
+  onReturnToWelcome?: () => void
+}
+
+export function DashboardBuilder({ onReturnToWelcome }: DashboardBuilderProps) {
   const [isHydrated, setIsHydrated] = useState(false)
   const { contextMenuPosition, openContextMenu, closeContextMenu } = useContextMenu()
 
@@ -57,20 +62,39 @@ export function DashboardBuilder() {
           className={cn(
             'flex items-center justify-between px-4 py-3',
             'bg-[rgba(255,255,255,0.5)] dark:bg-[rgba(30,30,50,0.5)]',
-            'border-b border-[rgba(255,255,255,0.6)] dark:border-[rgba(255,255,255,0.08)]',
+            'border-b border-[rgba(255,255,255,0.6)] dark:border-[rgba(255,255,255,0.18)]',
             'backdrop-blur-[10px]'
           )}
         >
           <div className="flex items-center gap-3">
-            {/* Company Logo */}
-            <Image
-              src="/images/BLACK FONTS.png"
-              alt="Mages Studio"
-              width={100}
-              height={30}
-              className="h-6 w-auto object-contain"
-              priority
-            />
+            {/* Home Button - returns to welcome screen */}
+            {onReturnToWelcome && (
+              <button
+                onClick={onReturnToWelcome}
+                className={cn(
+                  'group flex items-center gap-2 px-3 py-2 rounded-xl',
+                  'bg-[rgba(255,255,255,0.6)] dark:bg-[rgba(40,40,60,0.6)]',
+                  'border border-[rgba(255,255,255,0.7)] dark:border-[rgba(255,255,255,0.12)]',
+                  'hover:bg-[rgba(255,255,255,0.8)] dark:hover:bg-[rgba(50,50,70,0.7)]',
+                  'hover:border-[#3BC9DB]/40 dark:hover:border-[#3BC9DB]/30',
+                  'transition-all duration-200',
+                  'focus:outline-none focus:ring-2 focus:ring-[#3BC9DB]/30'
+                )}
+                title="Return to Welcome Screen"
+                aria-label="Return to Welcome Screen"
+              >
+                <Home className="w-4 h-4 text-[#6A6A7A] dark:text-[#9A9AAA] group-hover:text-[#3BC9DB] transition-colors" />
+                <span className="text-sm font-medium text-[#6A6A7A] dark:text-[#9A9AAA] group-hover:text-[#3BC9DB] transition-colors">
+                  Home
+                </span>
+              </button>
+            )}
+
+            <div className="h-6 w-px bg-[rgba(0,0,0,0.08)] dark:bg-[rgba(255,255,255,0.08)]" />
+
+            {/* Company Logo - theme-aware */}
+            <Logo width={160} height={48} className="h-10 w-auto object-contain" />
+
             <div className="h-5 w-px bg-[rgba(0,0,0,0.1)] dark:bg-[rgba(255,255,255,0.1)]" />
             <div>
               <h1 className="text-lg font-bold text-[#2A2A3A] dark:text-[#F5F5FA]">

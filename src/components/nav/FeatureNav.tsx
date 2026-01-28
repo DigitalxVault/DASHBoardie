@@ -22,7 +22,7 @@ export function FeatureNav({ className }: FeatureNavProps) {
         'h-full flex flex-col',
         'bg-[rgba(255,255,255,0.7)] dark:bg-[rgba(30,30,50,0.8)]',
         'backdrop-blur-[20px]',
-        'border-r border-[rgba(255,255,255,0.85)] dark:border-[rgba(255,255,255,0.12)]',
+        'border-r border-[rgba(255,255,255,0.85)] dark:border-[rgba(255,255,255,0.25)]',
         'shadow-[4px_0_16px_rgba(0,0,0,0.05)] dark:shadow-[4px_0_16px_rgba(0,0,0,0.2)]',
         'transition-all duration-300 ease-in-out',
         isNavCollapsed ? 'w-[64px]' : 'w-[280px]',
@@ -33,7 +33,7 @@ export function FeatureNav({ className }: FeatureNavProps) {
       <div
         className={cn(
           'flex items-center gap-3 p-4',
-          'border-b border-[rgba(138,138,154,0.15)] dark:border-[rgba(255,255,255,0.08)]',
+          'border-b border-[rgba(138,138,154,0.15)] dark:border-[rgba(255,255,255,0.18)]',
           isNavCollapsed && 'justify-center'
         )}
       >
@@ -86,7 +86,7 @@ export function FeatureNav({ className }: FeatureNavProps) {
 
       {/* Footer hint */}
       {!isNavCollapsed && (
-        <div className="p-3 border-t border-[rgba(138,138,154,0.15)] dark:border-[rgba(255,255,255,0.08)]">
+        <div className="p-3 border-t border-[rgba(138,138,154,0.15)] dark:border-[rgba(255,255,255,0.18)]">
           <p className="text-xs text-center text-[#8A8A9A] dark:text-[#7A7A8A]">
             Drag items onto the canvas to add them
           </p>
