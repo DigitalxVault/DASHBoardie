@@ -1,6 +1,6 @@
 // Canvas and Block type definitions for Dash-Boardie
 
-export type BlockType = 'timer' | 'dice' | 'soundEffects' | 'backgroundMusic'
+export type BlockType = 'timer' | 'dice' | 'soundEffects' | 'backgroundMusic' | 'progressBar'
 
 export type BlockRotation = 0 | 90 | 180 | 270
 
@@ -53,10 +53,14 @@ export const BLOCK_DEFAULTS: Record<BlockType, BlockSizeConstraints> = {
     default: { width: 400, height: 450 },
     min: { width: 320, height: 380 },
   },
+  progressBar: {
+    default: { width: 350, height: 280 },
+    min: { width: 280, height: 220 },
+  },
 }
 
 // Import Lucide icons for use in components
-import { Timer, Dices, Volume2, Music, type LucideIcon } from 'lucide-react'
+import { Timer, Dices, Volume2, Music, Gauge, type LucideIcon } from 'lucide-react'
 
 // Block metadata for navigation and display
 export interface BlockMetadata {
@@ -95,6 +99,13 @@ export const BLOCK_METADATA: Record<BlockType, BlockMetadata> = {
     icon: Music,
     colorClass: 'text-[#FF8A80] bg-[rgba(255,138,128,0.15)]',
     accentColor: '#FF8A80',
+  },
+  progressBar: {
+    name: 'Progress Bar',
+    description: 'Track progress 0-100%',
+    icon: Gauge,
+    colorClass: 'text-[#FF6B6B] bg-[rgba(255,107,107,0.15)]',
+    accentColor: '#FF6B6B',
   },
 }
 

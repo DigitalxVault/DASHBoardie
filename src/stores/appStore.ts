@@ -28,6 +28,13 @@ interface TimerState {
   initialTime: number // for countdown reset
 }
 
+// Progress bar state (persisted)
+interface ProgressBarState {
+  value: number      // 0-100
+  increment: number  // step size (default: 10)
+  color: string      // hex color for progress bar
+}
+
 // Dice roll state
 export interface DiceRoll {
   id: string
@@ -64,6 +71,9 @@ interface AppState {
   // Dice configuration (persisted)
   diceCount: number // 1-6 dice
 
+  // Progress bar state (persisted)
+  progressBar: ProgressBarState
+
   // Actions
   setTheme: (theme: Theme) => void
   toggleTheme: () => void
@@ -93,6 +103,13 @@ interface AppState {
   addDiceRoll: (roll: DiceRoll) => void
   clearDiceHistory: () => void
   setDiceCount: (count: number) => void
+
+  // Progress bar actions
+  setProgressBarValue: (value: number) => void
+  setProgressBarIncrement: (increment: number) => void
+  setProgressBarColor: (color: string) => void
+  incrementProgress: () => void
+  decrementProgress: () => void
 }
 
 // Default sound effect buttons
@@ -123,6 +140,13 @@ const defaultTimer: TimerState = {
   initialTime: 0,
 }
 
+// Default progress bar state
+const defaultProgressBar: ProgressBarState = {
+  value: 0,
+  increment: 10,
+  color: '#FF6B6B',
+}
+
 export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
@@ -147,6 +171,9 @@ export const useAppStore = create<AppState>()(
 
       // Default dice count
       diceCount: 2,
+
+      // Default progress bar
+      progressBar: defaultProgressBar,
 
       // Theme actions
       setTheme: (theme) => set({ theme }),
@@ -254,6 +281,38 @@ export const useAppStore = create<AppState>()(
 
       setDiceCount: (count) =>
         set({ diceCount: Math.max(1, Math.min(6, count)) }),
+
+      // Progress bar actions
+      setProgressBarValue: (value) =>
+        set((state) => ({
+          progressBar: { ...state.progressBar, value: Math.max(0, Math.min(100, value)) },
+        })),
+
+      setProgressBarIncrement: (increment) =>
+        set((state) => ({
+          progressBar: { ...state.progressBar, increment: Math.max(1, Math.min(50, increment)) },
+        })),
+
+      setProgressBarColor: (color) =>
+        set((state) => ({
+          progressBar: { ...state.progressBar, color },
+        })),
+
+      incrementProgress: () =>
+        set((state) => ({
+          progressBar: {
+            ...state.progressBar,
+            value: Math.min(100, state.progressBar.value + state.progressBar.increment),
+          },
+        })),
+
+      decrementProgress: () =>
+        set((state) => ({
+          progressBar: {
+            ...state.progressBar,
+            value: Math.max(0, state.progressBar.value - state.progressBar.increment),
+          },
+        })),
     }),
     {
       name: 'dashboardie-storage',
@@ -281,6 +340,7 @@ export const useAppStore = create<AppState>()(
         soundEffectButtons: state.soundEffectButtons,
         diceRolls: state.diceRolls,
         diceCount: state.diceCount,
+        progressBar: state.progressBar,
       }),
       skipHydration: true,
     }

@@ -12,6 +12,7 @@ const TimerBlock = lazy(() => import('@/components/blocks/TimerBlock').then(m =>
 const DiceBlock = lazy(() => import('@/components/blocks/DiceBlock').then(m => ({ default: m.DiceBlock })))
 const SoundEffectsBlock = lazy(() => import('@/components/blocks/SoundEffectsBlock').then(m => ({ default: m.SoundEffectsBlock })))
 const BackgroundMusicBlock = lazy(() => import('@/components/blocks/BackgroundMusicBlock').then(m => ({ default: m.BackgroundMusicBlock })))
+const ProgressBarBlock = lazy(() => import('@/components/blocks/ProgressBarBlock').then(m => ({ default: m.ProgressBarBlock })))
 
 interface BlockNodeData {
   type: BlockType
@@ -41,6 +42,8 @@ function BlockContent({ type }: { type: BlockType }) {
       return <SoundEffectsBlock />
     case 'backgroundMusic':
       return <BackgroundMusicBlock />
+    case 'progressBar':
+      return <ProgressBarBlock />
     default:
       return null
   }
