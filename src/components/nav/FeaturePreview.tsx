@@ -1,6 +1,6 @@
 'use client'
 
-import { Timer, Dices, Volume2, Music } from 'lucide-react'
+import { Timer, Dices, Volume2, Music, Gauge } from 'lucide-react'
 import { type BlockType } from '@/types/canvas'
 import { cn } from '@/lib/utils'
 
@@ -27,6 +27,10 @@ const typeColors: Record<BlockType, { bg: string; icon: string }> = {
     bg: 'bg-[rgba(255,138,128,0.15)] dark:bg-[rgba(255,138,128,0.2)]',
     icon: 'text-[#FF8A80]',
   },
+  progressBar: {
+    bg: 'bg-[rgba(255,107,107,0.15)] dark:bg-[rgba(255,107,107,0.2)]',
+    icon: 'text-[#FF6B6B]',
+  },
 }
 
 const typeIcons: Record<BlockType, React.ComponentType<{ className?: string }>> = {
@@ -34,6 +38,7 @@ const typeIcons: Record<BlockType, React.ComponentType<{ className?: string }>> 
   dice: Dices,
   soundEffects: Volume2,
   backgroundMusic: Music,
+  progressBar: Gauge,
 }
 
 export function FeaturePreview({ type, className }: FeaturePreviewProps) {
