@@ -6,7 +6,7 @@ import { type BlockType, BLOCK_METADATA } from '@/types/canvas'
 import { cn } from '@/lib/utils'
 import { FeatureNavItem } from './FeatureNavItem'
 
-const BLOCK_TYPES: BlockType[] = ['timer', 'dice', 'soundEffects', 'backgroundMusic', 'progressBar']
+const BLOCK_TYPES: BlockType[] = ['timer', 'dice', 'soundEffects', 'backgroundMusic', 'progressBar', 'voiceGenerator']
 
 interface FeatureNavProps {
   className?: string

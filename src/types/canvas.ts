@@ -1,6 +1,6 @@
 // Canvas and Block type definitions for Dash-Boardie
 
-export type BlockType = 'timer' | 'dice' | 'soundEffects' | 'backgroundMusic' | 'progressBar'
+export type BlockType = 'timer' | 'dice' | 'soundEffects' | 'backgroundMusic' | 'progressBar' | 'voiceGenerator'
 
 export type BlockRotation = 0 | 90 | 180 | 270
 
@@ -57,10 +57,14 @@ export const BLOCK_DEFAULTS: Record<BlockType, BlockSizeConstraints> = {
     default: { width: 350, height: 280 },
     min: { width: 280, height: 220 },
   },
+  voiceGenerator: {
+    default: { width: 450, height: 520 },
+    min: { width: 380, height: 450 },
+  },
 }
 
 // Import Lucide icons for use in components
-import { Timer, Dices, Volume2, Music, Gauge, type LucideIcon } from 'lucide-react'
+import { Timer, Dices, Volume2, Music, Gauge, AudioLines, type LucideIcon } from 'lucide-react'
 
 // Block metadata for navigation and display
 export interface BlockMetadata {
@@ -106,6 +110,13 @@ export const BLOCK_METADATA: Record<BlockType, BlockMetadata> = {
     icon: Gauge,
     colorClass: 'text-[#FF6B6B] bg-[rgba(255,107,107,0.15)]',
     accentColor: '#FF6B6B',
+  },
+  voiceGenerator: {
+    name: 'Voice Generator',
+    description: 'ElevenLabs TTS',
+    icon: AudioLines,
+    colorClass: 'text-[#9B59B6] bg-[rgba(155,89,182,0.15)]',
+    accentColor: '#9B59B6',
   },
 }
 

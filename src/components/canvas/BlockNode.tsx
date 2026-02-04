@@ -13,6 +13,7 @@ const DiceBlock = lazy(() => import('@/components/blocks/DiceBlock').then(m => (
 const SoundEffectsBlock = lazy(() => import('@/components/blocks/SoundEffectsBlock').then(m => ({ default: m.SoundEffectsBlock })))
 const BackgroundMusicBlock = lazy(() => import('@/components/blocks/BackgroundMusicBlock').then(m => ({ default: m.BackgroundMusicBlock })))
 const ProgressBarBlock = lazy(() => import('@/components/blocks/ProgressBarBlock').then(m => ({ default: m.ProgressBarBlock })))
+const VoiceGeneratorBlock = lazy(() => import('@/components/blocks/VoiceGeneratorBlock').then(m => ({ default: m.VoiceGeneratorBlock })))
 
 interface BlockNodeData {
   type: BlockType
@@ -44,6 +45,8 @@ function BlockContent({ type }: { type: BlockType }) {
       return <BackgroundMusicBlock />
     case 'progressBar':
       return <ProgressBarBlock />
+    case 'voiceGenerator':
+      return <VoiceGeneratorBlock />
     default:
       return null
   }

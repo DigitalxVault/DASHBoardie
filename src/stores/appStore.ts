@@ -8,6 +8,19 @@ export interface SoundEffectButton {
   soundFile: string
 }
 
+// ElevenLabs voice configuration
+export interface ElevenLabsVoice {
+  id: string
+  name: string
+  voiceId: string
+}
+
+// Voice generator state (persisted)
+interface VoiceGeneratorState {
+  voices: ElevenLabsVoice[]
+  selectedVoiceId: string | null
+}
+
 // Music playback state (loop is persisted, others are runtime)
 interface MusicPlaybackState {
   isPlaying: boolean
@@ -74,6 +87,9 @@ interface AppState {
   // Progress bar state (persisted)
   progressBar: ProgressBarState
 
+  // Voice generator state (persisted)
+  voiceGenerator: VoiceGeneratorState
+
   // Actions
   setTheme: (theme: Theme) => void
   toggleTheme: () => void
@@ -110,6 +126,12 @@ interface AppState {
   setProgressBarColor: (color: string) => void
   incrementProgress: () => void
   decrementProgress: () => void
+
+  // Voice generator actions
+  addVoice: (voice: ElevenLabsVoice) => void
+  updateVoice: (id: string, updates: Partial<ElevenLabsVoice>) => void
+  removeVoice: (id: string) => void
+  setSelectedVoice: (voiceId: string | null) => void
 }
 
 // Default sound effect buttons
@@ -147,6 +169,12 @@ const defaultProgressBar: ProgressBarState = {
   color: '#FF6B6B',
 }
 
+// Default voice generator state
+const defaultVoiceGenerator: VoiceGeneratorState = {
+  voices: [],
+  selectedVoiceId: null,
+}
+
 export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
@@ -174,6 +202,9 @@ export const useAppStore = create<AppState>()(
 
       // Default progress bar
       progressBar: defaultProgressBar,
+
+      // Default voice generator
+      voiceGenerator: defaultVoiceGenerator,
 
       // Theme actions
       setTheme: (theme) => set({ theme }),
@@ -313,6 +344,42 @@ export const useAppStore = create<AppState>()(
             value: Math.max(0, state.progressBar.value - state.progressBar.increment),
           },
         })),
+
+      // Voice generator actions
+      addVoice: (voice) =>
+        set((state) => ({
+          voiceGenerator: {
+            ...state.voiceGenerator,
+            voices: [...state.voiceGenerator.voices, voice],
+          },
+        })),
+
+      updateVoice: (id, updates) =>
+        set((state) => ({
+          voiceGenerator: {
+            ...state.voiceGenerator,
+            voices: state.voiceGenerator.voices.map((v) =>
+              v.id === id ? { ...v, ...updates } : v
+            ),
+          },
+        })),
+
+      removeVoice: (id) =>
+        set((state) => ({
+          voiceGenerator: {
+            ...state.voiceGenerator,
+            voices: state.voiceGenerator.voices.filter((v) => v.id !== id),
+            selectedVoiceId:
+              state.voiceGenerator.selectedVoiceId === id
+                ? null
+                : state.voiceGenerator.selectedVoiceId,
+          },
+        })),
+
+      setSelectedVoice: (voiceId) =>
+        set((state) => ({
+          voiceGenerator: { ...state.voiceGenerator, selectedVoiceId: voiceId },
+        })),
     }),
     {
       name: 'dashboardie-storage',
@@ -341,6 +408,7 @@ export const useAppStore = create<AppState>()(
         diceRolls: state.diceRolls,
         diceCount: state.diceCount,
         progressBar: state.progressBar,
+        voiceGenerator: state.voiceGenerator,
       }),
       skipHydration: true,
     }
