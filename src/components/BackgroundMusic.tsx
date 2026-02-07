@@ -50,19 +50,41 @@ function MusicPlayer({
   const progressUpdateRef = useRef<NodeJS.Timeout | null>(null);
   const durationInSeconds = useRef(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const gainNodeRef = useRef<GainNode | null>(null);
 
   useEffect(() => {
     progressRef.current = progress;
   }, [progress]);
 
-  // Create and manage audio element directly for full control
+  // Create and manage audio element with Web Audio API GainNode for volume
+  // iOS ignores HTMLAudioElement.volume, so we route through a GainNode instead
   useEffect(() => {
     const soundPath = `/sounds/background/${encodeURIComponent(track)}`;
     const audio = new Audio(soundPath);
+    audio.crossOrigin = 'anonymous';
     audioRef.current = audio;
 
-    // Set initial volume (clamped for safety)
-    audio.volume = Math.max(0, Math.min(1, volume));
+    // Keep audio element at max volume - GainNode controls actual volume
+    audio.volume = 1;
+
+    // Set up Web Audio API pipeline for iOS-compatible volume control
+    try {
+      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const ctx = audioContextRef.current || new AudioCtx();
+      audioContextRef.current = ctx;
+
+      const source = ctx.createMediaElementSource(audio);
+      const gainNode = ctx.createGain();
+      gainNode.gain.value = Math.max(0, Math.min(1, volume));
+      source.connect(gainNode);
+      gainNode.connect(ctx.destination);
+      gainNodeRef.current = gainNode;
+    } catch {
+      // Fallback: if Web Audio API fails, use HTMLAudioElement.volume directly
+      audio.volume = Math.max(0, Math.min(1, volume));
+      gainNodeRef.current = null;
+    }
 
     // Get duration when metadata loads
     audio.addEventListener('loadedmetadata', () => {
@@ -96,6 +118,7 @@ function MusicPlayer({
     return () => {
       audio.pause();
       audio.src = '';
+      gainNodeRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [track, loop]);
@@ -112,8 +135,17 @@ function MusicPlayer({
     if (!audio) return;
 
     if (isPlaying) {
-      // Set volume right before playing using ref to get current value
-      audio.volume = Math.max(0, Math.min(1, volumeRef.current));
+      // Resume AudioContext if suspended (required on iOS after user gesture)
+      const ctx = audioContextRef.current;
+      if (ctx && ctx.state === 'suspended') {
+        ctx.resume();
+      }
+      // Set volume via GainNode before playing
+      if (gainNodeRef.current) {
+        gainNodeRef.current.gain.value = Math.max(0, Math.min(1, volumeRef.current));
+      } else {
+        audio.volume = Math.max(0, Math.min(1, volumeRef.current));
+      }
       audio.play().catch(() => {
         // Auto-play blocked or other error
         onPlayingChange(false);
@@ -123,14 +155,15 @@ function MusicPlayer({
     }
   }, [isPlaying, onPlayingChange]);
 
-  // Handle volume changes while playing - ensure volume is applied immediately
+  // Handle volume changes - use GainNode for iOS compatibility
   // This runs whenever volume changes, regardless of play state
   useEffect(() => {
-    const audio = audioRef.current;
-    if (audio) {
-      // Clamp volume between 0 and 1 for safety
-      const clampedVolume = Math.max(0, Math.min(1, volume));
-      audio.volume = clampedVolume;
+    const clampedVolume = Math.max(0, Math.min(1, volume));
+    if (gainNodeRef.current) {
+      gainNodeRef.current.gain.value = clampedVolume;
+    } else if (audioRef.current) {
+      // Fallback for non-Web Audio API browsers
+      audioRef.current.volume = clampedVolume;
     }
   }, [volume]);
 
