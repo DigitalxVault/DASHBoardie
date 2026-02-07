@@ -1,7 +1,7 @@
 {
-  "name": "LoFi Immersive Interface",
-  "short_name": "LoFi Interface",
-  "description": "Board Game Interactive Dashboard with Timer, Dice, and Ambient Audio",
+  "name": "Dash-Boardie",
+  "short_name": "Dash-Boardie",
+  "description": "Modular Dashboard Builder for Tabletop Gaming",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#EEEEF5",
