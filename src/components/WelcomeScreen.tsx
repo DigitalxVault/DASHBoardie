@@ -37,30 +37,28 @@ export function WelcomeScreen({ onEnter, isVisible = true }: WelcomeScreenProps)
   }, [isVisible]);
 
   // Redirect to Google OAuth if not authenticated
-  const redirectToGoogleLogin = () => {
-    const clientId = process.env.NEXT_PUBLIC_OAUTH_CLIENT_ID;
-    const redirectUri = process.env.NEXT_PUBLIC_OAUTH_REDIRECT_URI || `${window.location.origin}/api/auth/callback/google`;
+  const redirectToGoogleLogin = async () => {
+    try {
+      // Call server API to get the OAuth URL (keeps client ID server-side)
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+      });
 
-    if (!clientId) {
-      console.error('OAuth client ID not configured');
-      return;
+      if (!response.ok) {
+        console.error('Failed to get OAuth URL');
+        return;
+      }
+
+      const { authUrl, state } = await response.json();
+
+      // Store state for CSRF verification
+      sessionStorage.setItem('oauth_state', state);
+
+      // Redirect to Google
+      window.location.href = authUrl;
+    } catch (error) {
+      console.error('Login error:', error);
     }
-
-    const state = Math.random().toString(36).substring(2, 15) +
-                  Math.random().toString(36).substring(2, 15);
-
-    sessionStorage.setItem('oauth_state', state);
-
-    const params = new URLSearchParams({
-      client_id: clientId,
-      redirect_uri: redirectUri,
-      response_type: 'code',
-      scope: 'openid profile email',
-      state: state,
-      prompt: 'select_account',
-    });
-
-    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
   };
 
   // Check if user previously dismissed the prompt

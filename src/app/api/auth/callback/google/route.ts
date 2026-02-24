@@ -29,9 +29,12 @@ export async function GET(request: NextRequest) {
   try {
     const clientId = process.env.OAUTH_CLIENT_ID
     const clientSecret = process.env.OAUTH_CLIENT_SECRET
-    const redirectUri = process.env.OAUTH_REDIRECT_URI
 
-    if (!clientId || !clientSecret || !redirectUri) {
+    // Auto-detect redirect URI from request origin
+    const redirectUri = process.env.OAUTH_REDIRECT_URI ||
+      `${request.nextUrl.origin}/api/auth/callback/google`
+
+    if (!clientId || !clientSecret) {
       return NextResponse.redirect(
         new URL('/?error=' + encodeURIComponent('server_config'), request.url)
       )
