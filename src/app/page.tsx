@@ -1,7 +1,8 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { useAuthStore } from '@/stores/authStore';
 
 // Dynamically import components with SSR disabled
 const WelcomeScreen = dynamic(
@@ -16,6 +17,33 @@ const DashboardBuilder = dynamic(
 export default function Home() {
   const [showWelcome, setShowWelcome] = useState(true);
   const [showMain, setShowMain] = useState(false);
+  const { setUser, setLoading, isAuthenticated } = useAuthStore();
+
+  // Check session on mount
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const response = await fetch('/api/auth/session');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.isAuthenticated) {
+            setUser(data.user);
+            // If already authenticated, skip welcome screen and go directly to dashboard
+            setShowWelcome(false);
+            setTimeout(() => setShowMain(true), 100);
+          } else {
+            setUser(null);
+          }
+        }
+      } catch (error) {
+        console.error('Session check failed:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkSession();
+  }, [setUser, setLoading]);
 
   const handleEnter = useCallback(() => {
     // Fade out welcome screen

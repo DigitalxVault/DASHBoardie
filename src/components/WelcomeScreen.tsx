@@ -4,6 +4,7 @@ import { GlassButton } from '@/components/ui/GlassButton';
 import { GlassPanel } from '@/components/ui/GlassPanel';
 import { Logo } from '@/components/ui/Logo';
 import { useAudio } from '@/providers/AudioProvider';
+import { useAuthStore } from '@/stores/authStore';
 import { useState, useEffect } from 'react';
 
 interface WelcomeScreenProps {
@@ -23,6 +24,7 @@ const DISMISSAL_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 export function WelcomeScreen({ onEnter, isVisible = true }: WelcomeScreenProps) {
   const { unlock } = useAudio();
+  const { isAuthenticated, isLoading } = useAuthStore();
   const [isUnlocking, setIsUnlocking] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [showPWAInstall, setShowPWAInstall] = useState(false);
@@ -33,6 +35,33 @@ export function WelcomeScreen({ onEnter, isVisible = true }: WelcomeScreenProps)
       setIsUnlocking(false);
     }
   }, [isVisible]);
+
+  // Redirect to Google OAuth if not authenticated
+  const redirectToGoogleLogin = () => {
+    const clientId = process.env.NEXT_PUBLIC_OAUTH_CLIENT_ID;
+    const redirectUri = process.env.NEXT_PUBLIC_OAUTH_REDIRECT_URI || `${window.location.origin}/api/auth/callback/google`;
+
+    if (!clientId) {
+      console.error('OAuth client ID not configured');
+      return;
+    }
+
+    const state = Math.random().toString(36).substring(2, 15) +
+                  Math.random().toString(36).substring(2, 15);
+
+    sessionStorage.setItem('oauth_state', state);
+
+    const params = new URLSearchParams({
+      client_id: clientId,
+      redirect_uri: redirectUri,
+      response_type: 'code',
+      scope: 'openid profile email',
+      state: state,
+      prompt: 'select_account',
+    });
+
+    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+  };
 
   // Check if user previously dismissed the prompt
   useEffect(() => {
@@ -60,6 +89,13 @@ export function WelcomeScreen({ onEnter, isVisible = true }: WelcomeScreenProps)
   // Hide PWA prompt when entering the app
   const handleStart = async () => {
     if (isUnlocking) return;
+
+    // Check authentication first
+    if (!isAuthenticated) {
+      redirectToGoogleLogin();
+      return;
+    }
+
     setIsUnlocking(true);
     setShowPWAInstall(false);
 
@@ -112,7 +148,10 @@ export function WelcomeScreen({ onEnter, isVisible = true }: WelcomeScreenProps)
 
             {/* Instructions */}
             <p className="text-text-secondary text-sm">
-              Tap below to initialize audio systems and enter the control panel
+              {isAuthenticated
+                ? 'Tap below to initialize audio systems and enter the control panel'
+                : 'Sign in with your Mages Studio account to continue'
+              }
             </p>
 
             {/* Start Button */}
@@ -120,10 +159,10 @@ export function WelcomeScreen({ onEnter, isVisible = true }: WelcomeScreenProps)
               size="lg"
               variant="primary"
               onClick={handleStart}
-              disabled={isUnlocking}
+              disabled={isUnlocking || isLoading}
               className="w-full max-w-xs mx-auto"
             >
-              {isUnlocking ? 'Initializing...' : 'Tap to Begin'}
+              {isLoading ? 'Checking...' : isUnlocking ? 'Initializing...' : isAuthenticated ? 'Tap to Begin' : 'Sign In with Google'}
             </GlassButton>
 
             {/* Version info */}

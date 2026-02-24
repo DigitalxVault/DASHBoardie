@@ -3,6 +3,7 @@
 import { GlassPanel } from '@/components/ui/GlassPanel'
 import { GlassButton } from '@/components/ui/GlassButton'
 import { useAppStore, type ElevenLabsVoice } from '@/stores/appStore'
+import { useAuthStore } from '@/stores/authStore'
 import { useState, useCallback, useRef, useMemo } from 'react'
 import { Settings, Upload, Download, Loader2, AlertCircle, CheckCircle, Trash2, Plus } from 'lucide-react'
 import { createPortal } from 'react-dom'
@@ -186,6 +187,7 @@ function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 // ============================================
 export function VoiceGeneratorPanel() {
   const { voiceGenerator, setSelectedVoice } = useAppStore()
+  const { user, isAuthenticated } = useAuthStore()
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [singleText, setSingleText] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
@@ -207,12 +209,22 @@ export function VoiceGeneratorPanel() {
   const handleSingleGenerate = useCallback(async () => {
     if (!selectedVoice || !singleText.trim() || isGenerating) return
 
+    // Check authentication
+    if (!isAuthenticated || !user) {
+      showStatus('error', 'Please sign in to use Voice Generator')
+      return
+    }
+
     setIsGenerating(true)
     setStatus(null)
 
     const result = await generateSpeech({
       text: singleText.trim(),
       voiceId: selectedVoice.voiceId,
+      voiceName: selectedVoice.name,
+      userId: user.id,
+      userEmail: user.email,
+      userName: user.name,
     })
 
     if (result.success && result.audioBlob) {
@@ -225,7 +237,7 @@ export function VoiceGeneratorPanel() {
     }
 
     setIsGenerating(false)
-  }, [selectedVoice, singleText, isGenerating, showStatus])
+  }, [selectedVoice, singleText, isGenerating, showStatus, isAuthenticated, user])
 
   // Handle file selection
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -273,6 +285,12 @@ export function VoiceGeneratorPanel() {
   const handleBulkGenerate = useCallback(async () => {
     if (!selectedVoice || !selectedFile || isGenerating) return
 
+    // Check authentication
+    if (!isAuthenticated || !user) {
+      showStatus('error', 'Please sign in to use Voice Generator')
+      return
+    }
+
     setIsGenerating(true)
     setStatus(null)
 
@@ -300,6 +318,10 @@ export function VoiceGeneratorPanel() {
         const result = await generateSpeech({
           text: sentence,
           voiceId: selectedVoice.voiceId,
+          voiceName: selectedVoice.name,
+          userId: user.id,
+          userEmail: user.email,
+          userName: user.name,
         })
 
         if (result.success && result.audioBlob) {

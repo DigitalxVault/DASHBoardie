@@ -2,6 +2,40 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const ELEVENLABS_API_URL = 'https://api.elevenlabs.io/v1'
 
+// Helper to log activity (non-blocking)
+async function logVoiceGeneration(
+  request: NextRequest,
+  userId: string,
+  userEmail: string,
+  userName: string,
+  voiceName: string,
+  textLength: number,
+  success: boolean,
+  error?: string
+): Promise<void> {
+  try {
+    await fetch(`${request.nextUrl.origin}/api/activity/logs`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId,
+        userEmail,
+        userName,
+        action: 'voice_generation',
+        timestamp: Date.now(),
+        details: {
+          voiceName,
+          textLength,
+          success,
+          error,
+        },
+      }),
+    }).catch(err => console.error('Failed to log activity:', err))
+  } catch (err) {
+    // Silently fail logging errors
+  }
+}
+
 export async function POST(request: NextRequest) {
   const apiKey = process.env.ELEVENLABS_API_KEY
 
@@ -15,6 +49,10 @@ export async function POST(request: NextRequest) {
   let body: {
     text: string
     voiceId: string
+    voiceName?: string
+    userId?: string
+    userEmail?: string
+    userName?: string
     modelId?: string
     stability?: number
     similarityBoost?: number
@@ -29,7 +67,17 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  const { text, voiceId, modelId = 'eleven_monolingual_v1', stability = 0.5, similarityBoost = 0.75 } = body
+  const {
+    text,
+    voiceId,
+    voiceName = 'Unknown',
+    userId = 'anonymous',
+    userEmail = 'anonymous@magesstudio.com.sg',
+    userName = 'Anonymous',
+    modelId = 'eleven_monolingual_v1',
+    stability = 0.5,
+    similarityBoost = 0.75
+  } = body
 
   if (!text?.trim()) {
     return NextResponse.json({ error: 'Text cannot be empty' }, { status: 400 })
@@ -66,10 +114,17 @@ export async function POST(request: NextRequest) {
         errorData.detail?.status ||
         errorData.message ||
         `ElevenLabs API error: ${response.status} ${response.statusText}`
+
+      // Log failed generation
+      logVoiceGeneration(request, userId, userEmail, userName, voiceName, text.length, false, errorMessage)
+
       return NextResponse.json({ error: errorMessage }, { status: response.status })
     }
 
     const audioBuffer = await response.arrayBuffer()
+
+    // Log successful generation (non-blocking)
+    logVoiceGeneration(request, userId, userEmail, userName, voiceName, text.length, true)
 
     return new NextResponse(audioBuffer, {
       status: 200,

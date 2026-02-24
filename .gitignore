@@ -16,6 +16,9 @@ src/generated/
 .env.test.local
 .env.production.local
 
+# Activity logs (local persistence)
+.activity-logs.json
+
 # Debug
 npm-debug.log*
 

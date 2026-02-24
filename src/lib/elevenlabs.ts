@@ -3,6 +3,10 @@
 export interface TTSOptions {
   text: string
   voiceId: string
+  voiceName?: string
+  userId?: string
+  userEmail?: string
+  userName?: string
   modelId?: string
   stability?: number
   similarityBoost?: number
@@ -21,6 +25,10 @@ export async function generateSpeech(options: TTSOptions): Promise<TTSResult> {
   const {
     text,
     voiceId,
+    voiceName = 'Unknown',
+    userId = 'anonymous',
+    userEmail = 'anonymous@magesstudio.com.sg',
+    userName = 'Anonymous',
     modelId = 'eleven_monolingual_v1',
     stability = 0.5,
     similarityBoost = 0.75,
@@ -44,7 +52,17 @@ export async function generateSpeech(options: TTSOptions): Promise<TTSResult> {
     const response = await fetch('/api/tts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, voiceId, modelId, stability, similarityBoost }),
+      body: JSON.stringify({
+        text,
+        voiceId,
+        voiceName,
+        userId,
+        userEmail,
+        userName,
+        modelId,
+        stability,
+        similarityBoost
+      }),
     })
 
     if (!response.ok) {

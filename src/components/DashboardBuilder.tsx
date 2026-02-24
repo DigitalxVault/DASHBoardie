@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, lazy, Suspense } from 'react'
+import { useState, lazy, Suspense, useEffect } from 'react'
 import { useCanvasStore } from '@/stores/canvasStore'
 
 // Lazy load heavy canvas components
@@ -10,9 +10,14 @@ const DashboardCanvas = lazy(() => import('@/components/canvas').then(m => ({ de
 import { FeatureNav } from '@/components/nav'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { Logo } from '@/components/ui/Logo'
+import { ActivityLogButton } from '@/components/ui/ActivityLogButton'
+import { UserAccountButton } from '@/components/ui/UserAccountButton'
+import { ActivityLog } from '@/components/ui/ActivityLog'
+import { LoginModal } from '@/components/ui/LoginModal'
 import { Home } from 'lucide-react'
 import { ContextMenu, useContextMenu } from '@/components/ui/ContextMenu'
 import { useCanvasShortcuts } from '@/hooks/useCanvasShortcuts'
+import { useAuthStore } from '@/stores/authStore'
 import { cn } from '@/lib/utils'
 
 interface DashboardBuilderProps {
@@ -22,6 +27,34 @@ interface DashboardBuilderProps {
 export function DashboardBuilder({ onReturnToWelcome }: DashboardBuilderProps) {
   const [isHydrated, setIsHydrated] = useState(false)
   const { contextMenuPosition, openContextMenu, closeContextMenu } = useContextMenu()
+  const [isActivityLogOpen, setIsActivityLogOpen] = useState(false)
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+  const { setUser, setLoading } = useAuthStore()
+
+  // Check session on mount
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const response = await fetch('/api/auth/session')
+        if (response.ok) {
+          const data = await response.json()
+          if (data.isAuthenticated) {
+            setUser(data.user)
+          } else {
+            setUser(null)
+          }
+        }
+      } catch (error) {
+        console.error('Session check failed:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (isHydrated) {
+      checkSession()
+    }
+  }, [isHydrated, setUser, setLoading])
 
   // Enable keyboard shortcuts
   useCanvasShortcuts({ enabled: isHydrated })
@@ -90,6 +123,9 @@ export function DashboardBuilder({ onReturnToWelcome }: DashboardBuilderProps) {
               </button>
             )}
 
+            {/* Activity Log Button */}
+            <ActivityLogButton onClick={() => setIsActivityLogOpen(true)} />
+
             <div className="h-6 w-px bg-[rgba(0,0,0,0.08)] dark:bg-[rgba(255,255,255,0.08)]" />
 
             {/* Company Logo - theme-aware */}
@@ -115,6 +151,9 @@ export function DashboardBuilder({ onReturnToWelcome }: DashboardBuilderProps) {
               </span>
             </div>
 
+            {/* User Account Button */}
+            <UserAccountButton onClick={() => setIsLoginModalOpen(true)} />
+
             {/* Theme Toggle */}
             <ThemeToggle />
           </div>
@@ -134,6 +173,18 @@ export function DashboardBuilder({ onReturnToWelcome }: DashboardBuilderProps) {
 
       {/* Context Menu */}
       <ContextMenu position={contextMenuPosition} onClose={closeContextMenu} />
+
+      {/* Activity Log Modal */}
+      <ActivityLog
+        isOpen={isActivityLogOpen}
+        onClose={() => setIsActivityLogOpen(false)}
+      />
+
+      {/* Login/Account Modal */}
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+      />
     </div>
   )
 }
