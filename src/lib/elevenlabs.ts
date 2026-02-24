@@ -1,6 +1,4 @@
-// ElevenLabs API service for text-to-speech generation
-
-const ELEVENLABS_API_URL = 'https://api.elevenlabs.io/v1'
+// ElevenLabs TTS client — calls server-side /api/tts proxy
 
 export interface TTSOptions {
   text: string
@@ -17,22 +15,7 @@ export interface TTSResult {
 }
 
 /**
- * Get the ElevenLabs API key from environment variables
- */
-export function getApiKey(): string | undefined {
-  return process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY
-}
-
-/**
- * Check if the API key is configured
- */
-export function isApiKeyConfigured(): boolean {
-  const key = getApiKey()
-  return Boolean(key && key.length > 0)
-}
-
-/**
- * Generate speech from text using ElevenLabs API
+ * Generate speech via the server-side TTS proxy
  */
 export async function generateSpeech(options: TTSOptions): Promise<TTSResult> {
   const {
@@ -42,15 +25,6 @@ export async function generateSpeech(options: TTSOptions): Promise<TTSResult> {
     stability = 0.5,
     similarityBoost = 0.75,
   } = options
-
-  const apiKey = getApiKey()
-
-  if (!apiKey) {
-    return {
-      success: false,
-      error: 'API key not configured. Add NEXT_PUBLIC_ELEVENLABS_API_KEY to .env.local',
-    }
-  }
 
   if (!text.trim()) {
     return {
@@ -67,34 +41,17 @@ export async function generateSpeech(options: TTSOptions): Promise<TTSResult> {
   }
 
   try {
-    const response = await fetch(
-      `${ELEVENLABS_API_URL}/text-to-speech/${voiceId}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'xi-api-key': apiKey,
-        },
-        body: JSON.stringify({
-          text,
-          model_id: modelId,
-          voice_settings: {
-            stability,
-            similarity_boost: similarityBoost,
-          },
-        }),
-      }
-    )
+    const response = await fetch('/api/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, voiceId, modelId, stability, similarityBoost }),
+    })
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
-      const errorMessage = errorData.detail?.message ||
-                          errorData.detail?.status ||
-                          errorData.message ||
-                          `API error: ${response.status} ${response.statusText}`
       return {
         success: false,
-        error: errorMessage,
+        error: errorData.error || `API error: ${response.status} ${response.statusText}`,
       }
     }
 

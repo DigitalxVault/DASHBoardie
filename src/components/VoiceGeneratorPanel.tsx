@@ -9,7 +9,6 @@ import { createPortal } from 'react-dom'
 import {
   generateSpeech,
   downloadAudio,
-  isApiKeyConfigured,
   createFilenameFromText,
   parseTextFile,
   delay,
@@ -196,7 +195,6 @@ export function VoiceGeneratorPanel() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)
 
-  const apiKeyConfigured = isApiKeyConfigured()
   const selectedVoice = voiceGenerator.voices.find(v => v.id === voiceGenerator.selectedVoiceId)
 
   // Clear status after 5 seconds
@@ -358,19 +356,6 @@ export function VoiceGeneratorPanel() {
           </button>
         </div>
 
-        {/* API Key Status */}
-        {!apiKeyConfigured && (
-          <div className="mb-4 p-3 rounded-xl bg-[rgba(255,107,107,0.15)] border border-[rgba(255,107,107,0.3)]">
-            <div className="flex items-center gap-2 text-[#FF6B6B]">
-              <AlertCircle className="w-4 h-4 flex-shrink-0" />
-              <span className="text-sm font-medium">API key not configured</span>
-            </div>
-            <p className="text-xs text-text-muted mt-1 ml-6">
-              Add NEXT_PUBLIC_ELEVENLABS_API_KEY to .env.local
-            </p>
-          </div>
-        )}
-
         {/* Voice Selector */}
         <div className="mb-4">
           <label className="text-sm font-semibold text-text-secondary mb-2 block">
@@ -411,7 +396,7 @@ export function VoiceGeneratorPanel() {
             value={singleText}
             onChange={(e) => setSingleText(e.target.value)}
             placeholder="Enter text to generate..."
-            disabled={!apiKeyConfigured || !selectedVoice || isGenerating}
+            disabled={!selectedVoice || isGenerating}
             rows={3}
             className="nodrag nopan w-full px-3 py-2 rounded-lg resize-none
               bg-[rgba(255,255,255,0.8)] dark:bg-[rgba(40,40,60,0.8)]
@@ -425,7 +410,7 @@ export function VoiceGeneratorPanel() {
             size="sm"
             variant="primary"
             onClick={handleSingleGenerate}
-            disabled={!apiKeyConfigured || !selectedVoice || !singleText.trim() || isGenerating}
+            disabled={!selectedVoice || !singleText.trim() || isGenerating}
             className="w-full mt-2 flex items-center justify-center gap-2"
           >
             {isGenerating && bulkProgress.total === 0 ? (
@@ -503,7 +488,7 @@ export function VoiceGeneratorPanel() {
             size="sm"
             variant="primary"
             onClick={handleBulkGenerate}
-            disabled={!apiKeyConfigured || !selectedVoice || !selectedFile || isGenerating}
+            disabled={!selectedVoice || !selectedFile || isGenerating}
             className="w-full mt-2 flex items-center justify-center gap-2"
           >
             {isGenerating && bulkProgress.total > 0 ? (

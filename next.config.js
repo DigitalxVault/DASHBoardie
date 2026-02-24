@@ -31,9 +31,7 @@ const withPWA = require('@ducanh2912/next-pwa').default({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
   images: { unoptimized: true },
-  distDir: 'out',
   // Silence Turbopack warning - we use webpack for PWA compatibility
   turbopack: {},
   webpack: (config, { isServer }) => {
