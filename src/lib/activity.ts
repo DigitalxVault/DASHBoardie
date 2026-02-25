@@ -34,10 +34,18 @@ export async function logActivity(
  * Fetch activity logs from the server
  */
 export async function fetchActivityLogs(
-  limit: number = 50
+  limit: number = 50,
+  options?: {
+    adminMode?: boolean
+    days?: 30 | 60 | 90
+  }
 ): Promise<{ success: boolean; data?: ActivityLogEntry[]; error?: string }> {
   try {
-    const response = await fetch(`/api/activity/logs?limit=${limit}`)
+    const params = new URLSearchParams({ limit: String(limit) })
+    if (options?.adminMode) params.set('admin', 'true')
+    if (options?.days) params.set('days', String(options.days))
+
+    const response = await fetch(`/api/activity/logs?${params}`)
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))

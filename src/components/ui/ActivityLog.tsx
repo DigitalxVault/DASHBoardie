@@ -13,21 +13,43 @@ interface ActivityLogProps {
   onClose: () => void
 }
 
+const ADMIN_EMAIL = 'eugene.tan@magesstudio.com.sg'
+
 export function ActivityLog({ isOpen, onClose }: ActivityLogProps) {
   const { user } = useAuthStore()
   const [logs, setLogs] = useState<ActivityLogEntry[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [isAdminMode, setIsAdminMode] = useState(false)
+  const [dateRange, setDateRange] = useState<30 | 60 | 90>(90)
+
+  // Check if user is admin and enable admin mode by default
+  useEffect(() => {
+    const checkAdminStatus = () => {
+      const isAdmin = user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()
+      setIsAdminMode(isAdmin)
+    }
+    checkAdminStatus()
+  }, [user])
 
   const fetchLogs = useCallback(async () => {
     if (!user) return
     setIsLoading(true)
-    const result = await fetchActivityLogs(50)
+
+    // For admin, fetch with admin mode and date filter
+    const result = await fetchActivityLogs(
+      isAdminMode ? 1000 : 50, // Higher limit for admin
+      {
+        adminMode: isAdminMode,
+        days: dateRange
+      }
+    )
+
     if (result.success && result.data) {
       setLogs(result.data)
     }
     setIsLoading(false)
-  }, [user])
+  }, [user, isAdminMode, dateRange])
 
   useEffect(() => {
     if (isOpen) {
@@ -48,12 +70,15 @@ export function ActivityLog({ isOpen, onClose }: ActivityLogProps) {
 
   if (!isOpen) return null
 
-  // Filter logs to show voice generations and login/logout
-  const displayLogs = logs.filter(log =>
-    log.action === 'voice_generation' ||
-    (log.action === 'login' && log.userId === user?.id) ||
-    (log.action === 'logout' && log.userId === user?.id)
-  )
+  // For admin mode, show all logs (server already filtered)
+  // For non-admin, use client-side filter for login/logout
+  const displayLogs = isAdminMode
+    ? logs
+    : logs.filter(log =>
+        log.action === 'voice_generation' ||
+        (log.action === 'login' && log.userId === user?.id) ||
+        (log.action === 'logout' && log.userId === user?.id)
+      )
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -90,9 +115,38 @@ export function ActivityLog({ isOpen, onClose }: ActivityLogProps) {
         {/* User Info */}
         <div className="px-4 py-3 bg-[rgba(155,89,182,0.08)] border-b border-[rgba(0,0,0,0.06)]">
           <p className="text-sm text-text-secondary">
-            Showing activity for <span className="font-semibold text-[#9B59B6]">{user?.email}</span>
+            {isAdminMode
+              ? <>Showing activity for <span className="font-semibold text-[#38D9A9]">all users</span> (Admin Mode)</>
+              : <>Showing activity for <span className="font-semibold text-[#9B59B6]">{user?.email}</span></>
+            }
           </p>
         </div>
+
+        {/* Admin Controls - Only visible for admin user */}
+        {isAdminMode && (
+          <div className="mx-4 mb-3 p-3 rounded-xl bg-[rgba(56,217,169,0.1)] border border-[rgba(56,217,169,0.3)]">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-[#38D9A9] uppercase tracking-wide">
+                  Admin Mode
+                </span>
+              </div>
+
+              <div className="flex items-center gap-3">
+                {/* Date Range Selector */}
+                <select
+                  value={dateRange}
+                  onChange={(e) => setDateRange(Number(e.target.value) as 30 | 60 | 90)}
+                  className="px-3 py-1 rounded-lg text-sm bg-white dark:bg-[rgba(40,40,60,0.8)] border border-[rgba(0,0,0,0.1)] dark:border-[rgba(255,255,255,0.1)]"
+                >
+                  <option value={30}>Last 30 days</option>
+                  <option value={60}>Last 60 days</option>
+                  <option value={90}>Last 90 days</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Log List - Scrollable */}
         <div className="flex-1 overflow-y-auto p-4">
@@ -148,9 +202,16 @@ export function ActivityLog({ isOpen, onClose }: ActivityLogProps) {
                       <p className="text-sm font-medium text-text-primary truncate">
                         {formatActivityDetails(log)}
                       </p>
-                      <p className="text-xs text-text-muted">
-                        {formatActivityTime(log.timestamp)}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        {isAdminMode && (
+                          <span className="text-xs text-[#9B59B6] bg-[rgba(155,89,182,0.1)] px-2 py-0.5 rounded">
+                            {log.userEmail}
+                          </span>
+                        )}
+                        <span className="text-xs text-text-muted">
+                          {formatActivityTime(log.timestamp)}
+                        </span>
+                      </div>
                     </div>
 
                     {/* Expand Chevron */}
