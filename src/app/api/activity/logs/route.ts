@@ -1,37 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { readFile, writeFile } from 'fs/promises'
-import { join } from 'path'
-import { existsSync } from 'fs'
 import { verifyAdminRequest } from '@/lib/admin'
-
-const LOG_FILE = join(process.cwd(), '.activity-logs.json')
-
-async function getLogs(): Promise<any[]> {
-  try {
-    if (existsSync(LOG_FILE)) {
-      const data = await readFile(LOG_FILE, 'utf-8')
-      return JSON.parse(data)
-    }
-  } catch (error) {
-    console.error('Error reading logs:', error)
-  }
-  return []
-}
-
-async function addLog(entry: any): Promise<void> {
-  const logs = await getLogs()
-  logs.unshift(entry)
-
-  // Keep only last 5000 logs to prevent file from growing too large
-  // This gives ~100 days at ~50 voice generations/day
-  const trimmedLogs = logs.slice(0, 5000)
-
-  try {
-    await writeFile(LOG_FILE, JSON.stringify(trimmedLogs, null, 2))
-  } catch (error) {
-    console.error('Error writing logs:', error)
-  }
-}
+import { sql } from '@/lib/db'
 
 export async function GET(request: NextRequest) {
   const limit = parseInt(request.nextUrl.searchParams.get('limit') || '50')
@@ -61,31 +30,67 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  const logs = await getLogs()
-
-  // Filter by date range
+  // Calculate date cutoff
   const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000)
-  const filteredLogs = logs.filter((log: any) => log.timestamp > cutoff)
 
-  // For non-admin, filter login/logout to current user only
-  let displayLogs = filteredLogs
-  if (!isAdmin && currentUserId) {
-    displayLogs = filteredLogs.filter((log: any) =>
-      log.action === 'voice_generation' ||
-      (log.action === 'login' && log.userId === currentUserId) ||
-      (log.action === 'logout' && log.userId === currentUserId)
+  try {
+    let logs: any[] = []
+
+    if (isAdmin) {
+      // Admin: Get all logs within date range
+      const result = await sql`
+        SELECT id, user_id as "userId", user_email as "userEmail",
+               user_name as "userName", action, timestamp, details
+        FROM activity_logs
+        WHERE timestamp > ${cutoff}
+        ORDER BY timestamp DESC
+        LIMIT ${limit * 10}
+      `
+      logs = result
+    } else if (currentUserId) {
+      // Non-admin with session: voice generations + own login/logout
+      const result = await sql`
+        SELECT id, user_id as "userId", user_email as "userEmail",
+               user_name as "userName", action, timestamp, details
+        FROM activity_logs
+        WHERE timestamp > ${cutoff}
+          AND (action = 'voice_generation' OR user_id = ${currentUserId})
+        ORDER BY timestamp DESC
+        LIMIT ${limit}
+      `
+      logs = result
+    } else {
+      // No session: only voice generations
+      const result = await sql`
+        SELECT id, user_id as "userId", user_email as "userEmail",
+               user_name as "userName", action, timestamp, details
+        FROM activity_logs
+        WHERE timestamp > ${cutoff} AND action = 'voice_generation'
+        ORDER BY timestamp DESC
+        LIMIT ${limit}
+      `
+      logs = result
+    }
+
+    // Parse details from JSONB
+    logs = logs.map((log: any) => ({
+      ...log,
+      details: typeof log.details === 'string' ? JSON.parse(log.details) : log.details,
+    }))
+
+    return NextResponse.json({
+      logs,
+      total: logs.length,
+      isAdmin,
+      days,
+    })
+  } catch (error) {
+    console.error('Error fetching logs:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch logs' },
+      { status: 500 }
     )
-  } else if (!isAdmin) {
-    // No session - show only voice generations
-    displayLogs = filteredLogs.filter((log: any) => log.action === 'voice_generation')
   }
-
-  return NextResponse.json({
-    logs: displayLogs.slice(0, limit),
-    total: displayLogs.length,
-    isAdmin,
-    days,
-  })
 }
 
 export async function POST(request: NextRequest) {
@@ -111,11 +116,16 @@ export async function POST(request: NextRequest) {
       details: body.details || {},
     }
 
-    // Add to persistent storage
-    await addLog(entry)
+    // Insert into database
+    await sql`
+      INSERT INTO activity_logs (id, user_id, user_email, user_name, action, timestamp, details)
+      VALUES (${entry.id}, ${entry.userId}, ${entry.userEmail}, ${entry.userName},
+              ${entry.action}, ${entry.timestamp}, ${JSON.stringify(entry.details)})
+    `
 
     return NextResponse.json({ success: true, id: entry.id })
   } catch (error) {
+    console.error('Error creating log:', error)
     return NextResponse.json(
       { error: 'Invalid request body' },
       { status: 400 }
