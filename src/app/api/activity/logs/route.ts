@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyAdminRequest } from '@/lib/admin'
-import { sql } from '@/lib/db'
+import { sql, initActivityLogsTable } from '@/lib/db'
+
+// Ensure table exists before handling requests
+async function ensureTable() {
+  try {
+    await initActivityLogsTable()
+  } catch (error) {
+    console.error('Error ensuring table exists:', error)
+  }
+}
 
 export async function GET(request: NextRequest) {
+  // Ensure table exists
+  await ensureTable()
   const limit = parseInt(request.nextUrl.searchParams.get('limit') || '50')
   const days = parseInt(request.nextUrl.searchParams.get('days') || '90')
   const adminMode = request.nextUrl.searchParams.get('admin') === 'true'
@@ -94,6 +105,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  // Ensure table exists
+  await ensureTable()
+
   try {
     const body = await request.json()
 
